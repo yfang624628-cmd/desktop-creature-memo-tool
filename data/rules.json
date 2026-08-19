@@ -1,0 +1,251 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "note": "全局规则层：时段、日型、离线补算、职级、日程与随机事件的约束。这里不放任何文案。",
+    "source": "设计原则和砍掉的东西见 设计决策.md。check 字段不再参与判定，保留只供事件成败的文案分支使用。"
+  },
+  "phases": {
+    "_note": "24 小时全覆盖，晚上不是空白。工作日走这套，周末走 weekendPhases。",
+    "order": [
+      "dawn",
+      "morning",
+      "lunch",
+      "afternoon",
+      "dusk",
+      "evening",
+      "night"
+    ],
+    "map": {
+      "dawn": {
+        "label": "早间",
+        "start": "09:00",
+        "end": "10:00",
+        "mode": "startup",
+        "note": "生成今日日程，播报开场文案"
+      },
+      "morning": {
+        "label": "上午",
+        "start": "10:00",
+        "end": "12:00",
+        "mode": "work"
+      },
+      "lunch": {
+        "label": "中午",
+        "start": "12:00",
+        "end": "13:30",
+        "mode": "recover"
+      },
+      "afternoon": {
+        "label": "下午",
+        "start": "13:30",
+        "end": "18:00",
+        "mode": "work"
+      },
+      "dusk": {
+        "label": "傍晚",
+        "start": "18:00",
+        "end": "19:00",
+        "mode": "wrapup"
+      },
+      "evening": {
+        "label": "晚上",
+        "start": "19:00",
+        "end": "24:00",
+        "mode": "offwork",
+        "note": "传播高峰时段，必须有独立内容。见 copy.json > eveningPool"
+      },
+      "night": {
+        "label": "深夜",
+        "start": "00:00",
+        "end": "09:00",
+        "mode": "sleep"
+      }
+    }
+  },
+  "dayTypes": {
+    "_note": "周末和工作日不是同一天：作息、日程、文案全部分开。",
+    "byWeekday": [
+      "sunday",
+      "weekday",
+      "weekday",
+      "weekday",
+      "weekday",
+      "weekday",
+      "saturday"
+    ],
+    "weekday": {
+      "phaseSet": "weekday",
+      "workSchedule": true
+    },
+    "saturday": {
+      "phaseSet": "weekend",
+      "workSchedule": false
+    },
+    "sunday": {
+      "phaseSet": "weekend",
+      "workSchedule": false,
+      "dread": {
+        "fromHour": 20
+      },
+      "dreadNote": "周日恐惧。这是全职场最普遍的共同经验，也是这个产品最该抓住的一刻。"
+    }
+  },
+  "weekendPhases": {
+    "_note": "周末不复用工作日时段——起床晚、没有上下班、节奏完全不同。",
+    "map": {
+      "wnight": {
+        "label": "还睡着",
+        "start": "00:00",
+        "end": "10:00",
+        "mode": "sleep"
+      },
+      "wmorning": {
+        "label": "慢慢醒",
+        "start": "10:00",
+        "end": "13:00",
+        "mode": "slow"
+      },
+      "wafternoon": {
+        "label": "白天",
+        "start": "13:00",
+        "end": "18:00",
+        "mode": "free"
+      },
+      "wevening": {
+        "label": "傍晚",
+        "start": "18:00",
+        "end": "22:00",
+        "mode": "free"
+      },
+      "wlate": {
+        "label": "夜里",
+        "start": "22:00",
+        "end": "24:00",
+        "mode": "winddown"
+      }
+    },
+    "activityPhases": [
+      "wmorning",
+      "wafternoon",
+      "wevening"
+    ],
+    "eventsPerDay": [
+      2,
+      4
+    ]
+  },
+  "offline": {
+    "_note": "离线不是惩罚。隔多久回来，都不该看到一只濒死的生物——三档补算就是为这个。",
+    "tiers": [
+      {
+        "id": "short",
+        "maxHours": 2,
+        "mode": "full",
+        "note": "全额补算，逐小时结算，可补触发期间的随机事件"
+      },
+      {
+        "id": "medium",
+        "maxHours": 8,
+        "mode": "damped",
+        "note": "它自己撑过来了。随机事件只保留 2 条最有代表性的写入事件流。"
+      },
+      {
+        "id": "long",
+        "maxHours": null,
+        "mode": "rebaseline",
+        "note": "直接跳到当前时刻应有的日常基线，并生成「你不在的时候」摘要。长时间离线不是惩罚，是一次内容投放机会。"
+      }
+    ],
+    "digest": {
+      "enabled": true,
+      "note": "long 档必须生成。模板见 copy.json > offlineDigest。这句话本身就是传播素材。",
+      "fabricate": {
+        "meetingsPerDay": [
+          3,
+          9
+        ],
+        "conclusiveRatio": [
+          0.15,
+          0.4
+        ],
+        "revisionsPerDay": [
+          2,
+          7
+        ]
+      }
+    }
+  },
+  "levels": {
+    "_note": "7 个职级，纯时间驱动：开局实习生，每隔 promoteEveryDays 天升一级，到首席生物封顶。",
+    "L01": {
+      "name": "实习生"
+    },
+    "L02": {
+      "name": "初级"
+    },
+    "L03": {
+      "name": "中级"
+    },
+    "L04": {
+      "name": "高级"
+    },
+    "L05": {
+      "name": "资深"
+    },
+    "L06": {
+      "name": "负责人"
+    },
+    "L07": {
+      "name": "首席生物"
+    },
+    "_why": "升职是可见的、单向的、必然发生的。你们一起待够久它就升了——这正是「陪伴」本身，不需要用户做对任何事。",
+    "start": "L01",
+    "promoteEveryDays": [
+      14,
+      30
+    ]
+  },
+  "schedule": {
+    "_note": "每天 3–5 件事，早间生成，彼此至少隔 minGapMin 分钟。",
+    "eventsPerDay": [
+      3,
+      5
+    ],
+    "generateAt": "dawn",
+    "minGapMin": 45,
+    "fixedEvents": [
+      {
+        "taskId": "T12",
+        "at": "09:30",
+        "label": "早饭",
+        "note": "睡了一夜，先吃饭再上班。"
+      },
+      {
+        "taskId": "T12",
+        "at": "12:15",
+        "label": "吃饭",
+        "note": "午饭是固定日程，不靠用户触发。"
+      },
+      {
+        "taskId": "T14",
+        "at": "13:00",
+        "label": "午休",
+        "optional": true
+      },
+      {
+        "taskId": "T17",
+        "at": "15:00",
+        "label": "下午茶",
+        "note": "下午那一下歇口气。"
+      }
+    ]
+  },
+  "randomEvent": {
+    "_note": "触发概率逐条写在 events.json 里。这里只管全局闸门：多久检定一次、一天最多几条、冷却多久、多久内不重复。",
+    "checkIntervalMin": 15,
+    "maxPerDay": 8,
+    "cooldownMin": 40,
+    "noRepeatWithinHours": 4,
+    "prototypeExclusiveBypassesCap": true
+  }
+}

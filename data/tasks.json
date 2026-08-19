@@ -1,0 +1,191 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "note": "基于策划案 9 / 9.1。原表只给了 10 条任务的数值，T04/T06/T08/T09/T10 的数值缺失，此处补齐（标记 supplied: true）。所有任务补上 durationMin——原策划案完全没有时长概念，但『真实时间推进』必须要它。",
+    "b4Fixes": [
+      "T13 喝水的专注恢复从 +4 提到 +8：专注是消耗最重（写策划 -12）恢复最弱的一项，会最先崩",
+      "T12 吃饭改为固定日程事件（见 rules.json > schedule.fixedEvents），不再是唯一的用户触发型饱腹来源",
+      "新增 T17 下午茶，作为饱腹的第二个恢复来源"
+    ]
+  },
+
+  "tasks": [
+    {
+      "id": "T01", "name": "开会", "kind": "work",
+      "desc": "参加例会、周会、评审会、同步会",
+      "cost": { "focus": -8, "mood": -5 },
+      "attrs": { "primary": "expression", "secondary": "patience" },
+      "phases": ["morning", "afternoon"],
+      "durationMin": 60,
+      "tags": ["communication"],
+      "supplied": false
+    },
+    {
+      "id": "T02", "name": "写报告", "kind": "work",
+      "desc": "输出周报、复盘、研究结论、纪要",
+      "cost": { "focus": -10, "energy": -6 },
+      "attrs": { "primary": "execution", "secondary": "expression" },
+      "phases": ["morning", "afternoon"],
+      "durationMin": 90,
+      "tags": ["writing", "solo"],
+      "supplied": false
+    },
+    {
+      "id": "T03", "name": "写策划", "kind": "work",
+      "desc": "梳理传播、产品、创意或活动方案",
+      "cost": { "focus": -12, "satiety": -5 },
+      "attrs": { "primary": "insight", "secondary": "expression" },
+      "phases": ["morning", "afternoon"],
+      "durationMin": 90,
+      "tags": ["writing", "solo"],
+      "supplied": false
+    },
+    {
+      "id": "T04", "name": "做提案", "kind": "work",
+      "desc": "输出对外/对内汇报内容",
+      "cost": { "focus": -9, "mood": -5 },
+      "attrs": { "primary": "expression", "secondary": "insight" },
+      "phases": ["afternoon"],
+      "durationMin": 75,
+      "tags": ["communication", "output"],
+      "supplied": true
+    },
+    {
+      "id": "T05", "name": "修改反馈", "kind": "work",
+      "desc": "根据意见反复迭代内容",
+      "cost": { "mood": -10, "energy": -6 },
+      "attrs": { "primary": "patience", "secondary": "execution" },
+      "phases": ["afternoon"],
+      "durationMin": 60,
+      "tags": ["revision"],
+      "supplied": false
+    },
+    {
+      "id": "T06", "name": "研究分析", "kind": "work",
+      "desc": "看资料、做竞品、拆问题",
+      "cost": { "satiety": -7, "focus": -6 },
+      "attrs": { "primary": "insight", "secondary": "patience" },
+      "phases": ["morning"],
+      "durationMin": 90,
+      "tags": ["solo", "research"],
+      "supplied": true
+    },
+    {
+      "id": "T07", "name": "推进任务", "kind": "work",
+      "desc": "催进度、跟节点、处理零碎工作",
+      "cost": { "energy": -8, "mood": -4 },
+      "attrs": { "primary": "execution", "secondary": "expression" },
+      "phases": ["morning", "afternoon", "dusk"],
+      "durationMin": 45,
+      "tags": ["process"],
+      "supplied": false
+    },
+    {
+      "id": "T08", "name": "整理资料", "kind": "work",
+      "desc": "做归档、整理链接、补记录",
+      "cost": { "focus": -6, "energy": -5 },
+      "attrs": { "primary": "execution", "secondary": "patience" },
+      "phases": ["morning", "dusk"],
+      "durationMin": 45,
+      "tags": ["process", "solo"],
+      "supplied": true
+    },
+    {
+      "id": "T09", "name": "沟通对齐", "kind": "work",
+      "desc": "发消息、同步、拉齐理解",
+      "cost": { "mood": -6, "focus": -5 },
+      "attrs": { "primary": "expression", "secondary": "patience" },
+      "phases": ["morning", "afternoon", "dusk"],
+      "durationMin": 30,
+      "tags": ["communication"],
+      "supplied": true
+    },
+    {
+      "id": "T10", "name": "独立工作", "kind": "work",
+      "desc": "深度专注处理个人任务",
+      "cost": { "focus": -9, "energy": -7 },
+      "attrs": { "primary": "execution", "secondary": "insight" },
+      "phases": ["morning", "evening"],
+      "durationMin": 120,
+      "tags": ["solo", "deep"],
+      "supplied": true
+    },
+
+    {
+      "id": "T11", "name": "摸鱼", "kind": "recover",
+      "desc": "短暂放空、刷信息、闲聊",
+      "cost": { "mood": 6, "focus": 3 },
+      "phases": ["morning", "afternoon", "dusk", "evening"],
+      "durationMin": 15,
+      "userTriggerable": true,
+      "eventId": "E35",
+      "supplied": false
+    },
+    {
+      "id": "T12", "name": "吃饭", "kind": "recover",
+      "desc": "进食与恢复",
+      "cost": { "satiety": 18, "mood": 4 },
+      "phases": ["lunch", "evening"],
+      "durationMin": 45,
+      "userTriggerable": true,
+      "eventId": "E31",
+      "scheduled": true,
+      "supplied": false
+    },
+    {
+      "id": "T13", "name": "喝水", "kind": "recover",
+      "desc": "短恢复行为",
+      "cost": { "focus": 8, "mood": 2 },
+      "phases": ["morning", "afternoon", "dusk", "evening"],
+      "durationMin": 5,
+      "userTriggerable": true,
+      "eventId": "E34",
+      "supplied": false,
+      "changedFrom": "原 9.1 为 专注+4。B4 修复：专注消耗最重恢复最弱，会最先崩。"
+    },
+    {
+      "id": "T14", "name": "午休", "kind": "recover",
+      "desc": "中段恢复",
+      "cost": { "energy": 12, "focus": 8 },
+      "phases": ["lunch"],
+      "durationMin": 40,
+      "userTriggerable": true,
+      "eventId": "E32",
+      "supplied": false
+    },
+    {
+      "id": "T15", "name": "下班休息", "kind": "recover",
+      "desc": "长恢复行为",
+      "cost": { "energy": 20, "mood": 12 },
+      "phases": ["evening"],
+      "durationMin": 0,
+      "userTriggerable": true,
+      "eventId": "E32",
+      "supplied": false,
+      "note": "原 11.1 的『进入次日重置』已由 rules.json > decay.night 的睡眠回血取代"
+    },
+    {
+      "id": "T16", "name": "陪你一起工作", "kind": "companion",
+      "desc": "用户陪伴型协作任务",
+      "effect": { "costMultiplier": 0.5, "checkRateAdd": 0.10 },
+      "phases": ["morning", "afternoon", "dusk", "evening"],
+      "durationMin": 60,
+      "userTriggerable": true,
+      "eventId": ["E29", "E30"],
+      "supplied": false,
+      "note": "不进日程，只能由用户主动触发，附着在当前进行中的任务上"
+    },
+    {
+      "id": "T17", "name": "下午茶", "kind": "recover",
+      "desc": "补一点糖，撑过下午",
+      "cost": { "satiety": 10, "mood": 5 },
+      "phases": ["afternoon"],
+      "durationMin": 15,
+      "userTriggerable": true,
+      "eventId": "E36",
+      "supplied": true,
+      "isNew": true,
+      "reason": "B4 修复：原表饱腹只有 T12 吃饭一个恢复来源，配合每小时 -6 的衰减，每只生物每天下午必然饿到危险区。这不是设计，是数值失衡。"
+    }
+  ]
+}

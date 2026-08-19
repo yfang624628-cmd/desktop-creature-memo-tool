@@ -1,0 +1,6 @@
+{
+  "name": "workplace-creature-desktop",
+  "private": true,
+  "type": "commonjs",
+  "description": "根 package.json 是 type:module（给 tools/ 下的 .mjs 用）。Electron 的主进程和 preload 必须是 CommonJS，靠这个就近的 package.json 把 desktop/ 这一层单独声明回来。"
+}

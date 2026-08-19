@@ -1,0 +1,722 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "note": "基于策划案 10 节。原表的触发条件全是『低概率/高概率/随机/全天随机』，开发无法实现。此处逐条量化 probability 与结构化 trigger。",
+    "additions": [
+      "E34 你请它喝水、E35 你让它摸鱼一会儿、E36 你带它去下午茶 —— B2 修复：原 13.4 的按钮列表与 10.5 的互动事件表对不上，喝水/摸鱼有按钮无文案",
+      "E33 你鼓励了它 —— 原有事件但 13.4 没有对应按钮，需补按钮"
+    ],
+    "probabilityNote": "probability 为该事件在满足 trigger 条件时的独立触发概率。全局节流见 rules.json > randomEvent。",
+    "checkNote": "带 check 字段的事件走 rules.json > check 的公式，成功/失败使用不同文案。",
+    "prototypeExclusiveRule": "原型专属事件（trigger.prototypeIds）只保留文案与纯演出效果（taskDelayMin / transient），不得携带任何状态或属性增减。理由同 prototypes.json v2.0：这些事件绕过每日上限，某些原型每天白拿 +36、鼠标每天白掉 -18，等于把鼠标写成了缺点——与「两端对称赋值，不存在负极」直接冲突。性格只改变过程，不改变结果。"
+  },
+  "events": [
+    {
+      "id": "E01",
+      "name": "临时会议插入",
+      "category": "work",
+      "type": "interrupt",
+      "trigger": {
+        "when": "phaseTick",
+        "phases": [
+          "morning",
+          "afternoon"
+        ],
+        "requireActiveTask": true
+      },
+      "probability": 0.12,
+      "effect": {
+        "focus": -8
+      },
+      "copy": "它原本正在推进任务，突然被拖进了一个没有议程的会。"
+    },
+    {
+      "id": "E02",
+      "name": "需求变更",
+      "category": "work",
+      "type": "rejection",
+      "trigger": {
+        "when": "taskEnd",
+        "taskIds": [
+          "T03",
+          "T04"
+        ]
+      },
+      "probability": 0.25,
+      "effect": {
+        "mood": -9,
+        "focus": -4
+      },
+      "copy": "方向没有错，只是方向换了一个新的方向。"
+    },
+    {
+      "id": "E03",
+      "name": "反馈模糊",
+      "category": "work",
+      "type": "rejection",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T05"
+        ]
+      },
+      "probability": 0.35,
+      "effect": {
+        "mood": -8
+      },
+      "copy": "它收到了反馈：「感觉差一点，但又说不上来。」"
+    },
+    {
+      "id": "E04",
+      "name": "截止提前",
+      "category": "work",
+      "type": "pressure",
+      "trigger": {
+        "when": "phaseTick",
+        "phases": [
+          "afternoon"
+        ]
+      },
+      "probability": 0.18,
+      "effect": {
+        "energy": -7,
+        "focus": -5
+      },
+      "copy": "原本明天交的东西，现在被定义为今天也可以看看。"
+    },
+    {
+      "id": "E05",
+      "name": "信息不全",
+      "category": "work",
+      "type": "check",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T01",
+          "T07"
+        ]
+      },
+      "probability": 0.2,
+      "check": {
+        "attr": "insight"
+      },
+      "effect": {
+        "onSuccess": {
+          "insight": 1,
+          "mood": 3
+        },
+        "onFailure": {
+          "focus": -6,
+          "mood": -4
+        }
+      },
+      "copy": "它意识到，大家说了很多，但关键背景并没有出现。",
+      "copySuccess": "它把那个没人提的前提问了出来。会议的方向变了。",
+      "copyFailure": "它觉得哪里不对，但会已经开完了。"
+    },
+    {
+      "id": "E06",
+      "name": "被点名发言",
+      "category": "work",
+      "type": "check",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T01"
+        ]
+      },
+      "probability": 0.22,
+      "check": {
+        "attr": "expression"
+      },
+      "effect": {
+        "onSuccess": {
+          "expression": 1,
+          "mood": 5
+        },
+        "onFailure": {
+          "mood": -8,
+          "focus": -5
+        }
+      },
+      "copy": "它正在神游，突然听见有人叫它的名字。",
+      "copySuccess": "它顿了一秒，然后说了一段听起来像准备过的话。",
+      "copyFailure": "它说了三句，其中两句是在重复问题本身。"
+    },
+    {
+      "id": "E07",
+      "name": "会后补纪要",
+      "category": "work",
+      "type": "extra",
+      "trigger": {
+        "when": "taskEnd",
+        "taskIds": [
+          "T01"
+        ]
+      },
+      "probability": 0.3,
+      "effect": {
+        "energy": -6,
+        "focus": -4
+      },
+      "copy": "会虽然开完了，但真正的工作现在才开始。"
+    },
+    {
+      "id": "E08",
+      "name": "顺手接活",
+      "category": "work",
+      "type": "interrupt",
+      "trigger": {
+        "when": "phaseTick",
+        "phases": [
+          "morning",
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "probability": 0.15,
+      "effect": {
+        "energy": -5,
+        "mood": -3,
+        "queueAdd": 1
+      },
+      "copy": "它只是路过，却顺手被分配了一个小需求。"
+    },
+    {
+      "id": "E09",
+      "name": "更高级一点",
+      "category": "brand",
+      "type": "rejection",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T04",
+          "T05"
+        ]
+      },
+      "probability": 0.28,
+      "effect": {
+        "mood": -9
+      },
+      "copy": "对方希望这版更高级一点，但没有说明高级在哪里。"
+    },
+    {
+      "id": "E10",
+      "name": "再有传播感一点",
+      "category": "brand",
+      "type": "check",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T03"
+        ]
+      },
+      "probability": 0.25,
+      "check": {
+        "attr": [
+          "insight",
+          "expression"
+        ],
+        "pick": "higher"
+      },
+      "effect": {
+        "onSuccess": {
+          "insight": 1,
+          "mood": 4
+        },
+        "onFailure": {
+          "focus": -7,
+          "mood": -5
+        }
+      },
+      "copy": "它开始重新思考，什么叫更有传播感。",
+      "copySuccess": "它想通了：传播感的意思是这句话得有人愿意转述。",
+      "copyFailure": "它盯着那四个字看了二十分钟，什么也没发生。"
+    },
+    {
+      "id": "E11",
+      "name": "竞品突然很好",
+      "category": "brand",
+      "type": "neutral",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T06"
+        ]
+      },
+      "probability": 0.3,
+      "effect": {
+        "mood": -5,
+        "insightChance": 0.4
+      },
+      "copy": "它看见竞品新动作后，短暂沉默了三秒。"
+    },
+    {
+      "id": "E12",
+      "name": "slogan 不顺",
+      "category": "brand",
+      "type": "pressure",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T03"
+        ],
+        "jobIds": [
+          "J02",
+          "J03"
+        ]
+      },
+      "probability": 0.25,
+      "effect": {
+        "focus": -9
+      },
+      "copy": "它觉得这句话哪里不对，但暂时说不出哪里不对。"
+    },
+    {
+      "id": "E13",
+      "name": "KV 颜色有点脏",
+      "category": "brand",
+      "type": "check",
+      "trigger": {
+        "when": "taskDuring",
+        "jobIds": [
+          "J05",
+          "J06"
+        ]
+      },
+      "probability": 0.3,
+      "check": {
+        "attr": "patience"
+      },
+      "effect": {
+        "onSuccess": {
+          "patience": 1
+        },
+        "onFailure": {
+          "mood": -7,
+          "focus": -4
+        }
+      },
+      "copy": "它盯着屏幕看了很久，最终认同颜色确实有点脏。",
+      "copySuccess": "它调了三次，第三次对了。",
+      "copyFailure": "它调了十一次，现在它已经看不出区别了。"
+    },
+    {
+      "id": "E14",
+      "name": "用户洞察来了一下",
+      "category": "brand",
+      "type": "positive",
+      "trigger": {
+        "when": "taskDuring",
+        "taskIds": [
+          "T06",
+          "T03"
+        ]
+      },
+      "probability": 0.18,
+      "effect": {
+        "insight": 2,
+        "mood": 6,
+        "transient": "INSPIRED"
+      },
+      "copy": "一个模糊的想法突然在它脑内变得清晰。"
+    },
+    {
+      "id": "E15",
+      "name": "逻辑需要再顺一顺",
+      "category": "brand",
+      "type": "rejection",
+      "trigger": {
+        "when": "taskEnd",
+        "taskIds": [
+          "T04",
+          "T02"
+        ]
+      },
+      "probability": 0.25,
+      "effect": {
+        "energy": -6,
+        "mood": -6
+      },
+      "copy": "这份东西没有被否定，只是被要求再顺一顺。"
+    },
+    {
+      "id": "E16",
+      "name": "被夸了",
+      "category": "emotion",
+      "type": "positive",
+      "trigger": {
+        "when": "taskEnd",
+        "requireCheckSuccess": true
+      },
+      "probability": 0.15,
+      "effect": {
+        "mood": 14
+      },
+      "copy": "它被说了一句这版挺好，尾巴都轻了一点。"
+    },
+    {
+      "id": "E17",
+      "name": "没人回复",
+      "category": "emotion",
+      "type": "negative",
+      "trigger": {
+        "when": "taskEnd",
+        "taskIds": [
+          "T09"
+        ]
+      },
+      "probability": 0.3,
+      "effect": {
+        "mood": -7
+      },
+      "copy": "它发出去的信息安静地躺在那里，没有被回应。"
+    },
+    {
+      "id": "E18",
+      "name": "自我怀疑",
+      "category": "emotion",
+      "type": "negative",
+      "trigger": {
+        "when": "checkResult",
+        "consecutiveFailures": 2
+      },
+      "probability": 0.4,
+      "effect": {
+        "focus": -8,
+        "mood": -5
+      },
+      "copy": "它开始怀疑，是不是自己理解错了整个世界。"
+    },
+    {
+      "id": "E19",
+      "name": "进入状态",
+      "category": "emotion",
+      "type": "positive",
+      "trigger": {
+        "when": "checkResult",
+        "consecutiveSuccesses": 2,
+        "minFocus": 60
+      },
+      "probability": 0.35,
+      "effect": {
+        "focus": 10,
+        "transient": "INSPIRED"
+      },
+      "copy": "它突然进入了一个不想被打断的节奏。"
+    },
+    {
+      "id": "E20",
+      "name": "想下班了",
+      "category": "emotion",
+      "type": "negative",
+      "trigger": {
+        "when": "phaseTick",
+        "phases": [
+          "dusk"
+        ]
+      },
+      "probability": 0.45,
+      "effect": {
+        "executionMultiplier": 0.7,
+        "durationMin": 60
+      },
+      "copy": "虽然理论上还没下班，但精神已经先走了一部分。"
+    },
+    {
+      "id": "E21",
+      "name": "工位充电成功",
+      "category": "emotion",
+      "type": "positive",
+      "trigger": {
+        "when": "taskEnd",
+        "taskIds": [
+          "T13",
+          "T11"
+        ]
+      },
+      "probability": 0.35,
+      "effect": {
+        "mood": 5,
+        "focus": 5
+      },
+      "copy": "它在工位上发了一会儿呆，状态缓慢回升。"
+    },
+    {
+      "id": "E22",
+      "name": "袜子失去另一半",
+      "category": "absurd",
+      "type": "negative",
+      "trigger": {
+        "when": "dailyRoll",
+        "prototypeIds": [
+          "R13"
+        ]
+      },
+      "probability": 0.1,
+      "effect": {},
+      "copy": "它忽然意识到，自己可能永远也找不到另一只了。"
+    },
+    {
+      "id": "E23",
+      "name": "鼠标开始控制一切",
+      "category": "absurd",
+      "type": "neutral",
+      "trigger": {
+        "when": "phaseTick",
+        "prototypeIds": [
+          "R14"
+        ],
+        "phases": [
+          "morning",
+          "afternoon"
+        ]
+      },
+      "probability": 0.15,
+      "effect": {
+        "durationMin": 90
+      },
+      "copy": "它试图接管所有流程，包括不属于它的流程。"
+    },
+    {
+      "id": "E24",
+      "name": "Blob 形状不稳定",
+      "category": "absurd",
+      "type": "neutral",
+      "trigger": {
+        "when": "dailyRoll",
+        "prototypeIds": [
+          "R17"
+        ]
+      },
+      "probability": 1.0,
+      "effect": {},
+      "copy": "它今天看起来比昨天更像一个想法。"
+    },
+    {
+      "id": "E25",
+      "name": "幽灵短暂失联",
+      "category": "absurd",
+      "type": "neutral",
+      "trigger": {
+        "when": "phaseTick",
+        "prototypeIds": [
+          "R18"
+        ],
+        "phases": [
+          "dusk"
+        ]
+      },
+      "probability": 0.3,
+      "effect": {
+        "taskDelayMin": 30
+      },
+      "copy": "它仍在场，只是很难被确认是否真的在线。"
+    },
+    {
+      "id": "E26",
+      "name": "仙人掌拒绝无效社交",
+      "category": "absurd",
+      "type": "positive",
+      "trigger": {
+        "when": "taskDuring",
+        "prototypeIds": [
+          "R11"
+        ],
+        "taskIds": [
+          "T09",
+          "T01"
+        ]
+      },
+      "probability": 0.3,
+      "effect": {},
+      "copy": "它礼貌地拒绝了第六轮没有结论的同步。"
+    },
+    {
+      "id": "E27",
+      "name": "水母捕获灵感碎片",
+      "category": "absurd",
+      "type": "positive",
+      "trigger": {
+        "when": "phaseTick",
+        "prototypeIds": [
+          "R09"
+        ]
+      },
+      "probability": 0.12,
+      "effect": {
+        "transient": "INSPIRED"
+      },
+      "copy": "一句原本无用的话，突然在它脑内开花。"
+    },
+    {
+      "id": "E28",
+      "name": "郁金香晒到一点光",
+      "category": "absurd",
+      "type": "positive",
+      "trigger": {
+        "when": "phaseTick",
+        "prototypeIds": [
+          "R12"
+        ],
+        "phases": [
+          "morning",
+          "afternoon"
+        ]
+      },
+      "probability": 0.25,
+      "effect": {},
+      "copy": "它安静地恢复了一点生命力。"
+    },
+    {
+      "id": "E29",
+      "name": "你陪它开会",
+      "category": "user",
+      "type": "companion",
+      "trigger": {
+        "when": "userAction",
+        "action": "accompany",
+        "requireTaskIds": [
+          "T01",
+          "T09"
+        ]
+      },
+      "probability": 1.0,
+      "effect": {
+        "moodCostMultiplier": 0.5,
+        "checkRateAdd": 0.1
+      },
+      "copy": "它知道这场会很长，但你也在，所以还能忍。"
+    },
+    {
+      "id": "E30",
+      "name": "你陪它写策划",
+      "category": "user",
+      "type": "companion",
+      "trigger": {
+        "when": "userAction",
+        "action": "accompany",
+        "requireTaskIds": [
+          "T02",
+          "T03",
+          "T04",
+          "T10"
+        ]
+      },
+      "probability": 1.0,
+      "effect": {
+        "focusCostMultiplier": 0.5,
+        "checkRateAdd": 0.1
+      },
+      "copy": "它把几个散乱的想法慢慢拼成了结构。"
+    },
+    {
+      "id": "E31",
+      "name": "你提醒它吃饭",
+      "category": "user",
+      "type": "care",
+      "trigger": {
+        "when": "userAction",
+        "action": "feed"
+      },
+      "probability": 1.0,
+      "effect": {
+        "satiety": 18,
+        "mood": 4
+      },
+      "copy": "它本来想硬撑，但还是听劝去吃了点东西。",
+      "copyWhenLow": "它已经饿到看不进任何文字了。你叫它去吃饭，它没有反驳。"
+    },
+    {
+      "id": "E32",
+      "name": "你让它先休息",
+      "category": "user",
+      "type": "care",
+      "trigger": {
+        "when": "userAction",
+        "action": "rest"
+      },
+      "probability": 1.0,
+      "effect": {
+        "energy": 14,
+        "focus": 6,
+        "taskDelayMin": 30
+      },
+      "copy": "你没有催它继续做，它明显松了一口气。",
+      "copyWhenLow": "它已经撑不住了。你说先停一下，它就真的停了。"
+    },
+    {
+      "id": "E33",
+      "name": "你鼓励了它",
+      "category": "user",
+      "type": "care",
+      "trigger": {
+        "when": "userAction",
+        "action": "encourage"
+      },
+      "probability": 1.0,
+      "effect": {
+        "mood": 12
+      },
+      "copy": "它表面很平静，其实已经偷偷记住了这句鼓励。",
+      "note": "B2 修复：该事件原本存在，但 13.4 的按钮列表里没有对应按钮。需补『鼓励它』按钮。"
+    },
+    {
+      "id": "E34",
+      "name": "你请它喝水",
+      "category": "user",
+      "type": "care",
+      "trigger": {
+        "when": "userAction",
+        "action": "drink"
+      },
+      "probability": 1.0,
+      "effect": {
+        "focus": 8,
+        "mood": 2
+      },
+      "copy": "它接了杯水，回来的时候好像想起了自己原本在做什么。",
+      "isNew": true,
+      "note": "B2 修复：原 13.4 有『喝水』按钮，但 10.5 无对应事件文案"
+    },
+    {
+      "id": "E35",
+      "name": "你让它摸鱼一会儿",
+      "category": "user",
+      "type": "care",
+      "trigger": {
+        "when": "userAction",
+        "action": "slack"
+      },
+      "probability": 1.0,
+      "effect": {
+        "mood": 6,
+        "focus": 3
+      },
+      "copy": "你说不差这十分钟。它假装犹豫了一下，然后就去了。",
+      "isNew": true,
+      "note": "B2 修复：原 13.4 有『摸鱼』按钮，但 10.5 无对应事件文案"
+    },
+    {
+      "id": "E36",
+      "name": "你带它去下午茶",
+      "category": "user",
+      "type": "care",
+      "trigger": {
+        "when": "userAction",
+        "action": "snack",
+        "phases": [
+          "afternoon"
+        ]
+      },
+      "probability": 1.0,
+      "effect": {
+        "satiety": 10,
+        "mood": 5
+      },
+      "copy": "下午三点，它需要的其实不是咖啡因，是一个离开工位的理由。",
+      "isNew": true,
+      "note": "B4 修复：饱腹的第二个恢复来源，对应 T17"
+    }
+  ]
+}

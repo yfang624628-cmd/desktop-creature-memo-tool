@@ -1,0 +1,218 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "note": "A5 补完。原策划案 8.1 的『适合的任务池』引用了大量任务表里不存在的任务，开发时无法建立职位→任务映射，18 个职位就是 18 次猜测。",
+    "cleanup": [
+      "J01 『写纪要』→ T02 写报告；『改小稿』→ T05 修改反馈",
+      "J14 『陪伴恢复』→ 删除（T16 是用户触发型，不能进日程），替换为 T09 沟通对齐",
+      "J15 『评审』→ T01 开会；『关键决策』→ T04 做提案 + T05 修改反馈",
+      "J13 『写小结』→ T02 写报告",
+      "全表『提案』统一为 T04 做提案；『写方案』统一为 T03 写策划；『发消息』统一为 T09 沟通对齐；『推进流程』统一为 T07 推进任务"
+    ],
+    "rule": "taskPool 只允许引用 tasks.json 中的 T01–T10。T11–T15 为恢复类（走 rules.json > schedule.fixedEvents 或用户触发），T16 为用户陪伴型，均不参与日程生成。",
+    "weightNote": "weight 用于日程生成时的加权抽取，同一职位内相加不必为 100。"
+  },
+
+  "jobs": [
+    {
+      "id": "J01", "name": "品牌实习生", "category": "品牌",
+      "context": "辅助、整理、跟进",
+      "narrative": ["忙", "碎", "努力适应"],
+      "taskPool": [
+        { "taskId": "T08", "weight": 35 },
+        { "taskId": "T02", "weight": 25 },
+        { "taskId": "T05", "weight": 25 },
+        { "taskId": "T09", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J02", "name": "品牌策划", "category": "品牌",
+      "context": "提案、洞察、方向梳理",
+      "narrative": ["想法", "框架", "判断"],
+      "taskPool": [
+        { "taskId": "T03", "weight": 40 },
+        { "taskId": "T04", "weight": 25 },
+        { "taskId": "T06", "weight": 20 },
+        { "taskId": "T01", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J03", "name": "文案编辑", "category": "品牌",
+      "context": "写内容、改措辞、打磨语言",
+      "narrative": ["咬字", "推敲", "修辞"],
+      "taskPool": [
+        { "taskId": "T02", "weight": 35 },
+        { "taskId": "T05", "weight": 30 },
+        { "taskId": "T03", "weight": 20 },
+        { "taskId": "T10", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J04", "name": "客户经理", "category": "商务/项目",
+      "context": "沟通、跟进、协调",
+      "narrative": ["对齐", "协调", "推进"],
+      "taskPool": [
+        { "taskId": "T01", "weight": 35 },
+        { "taskId": "T09", "weight": 30 },
+        { "taskId": "T07", "weight": 20 },
+        { "taskId": "T05", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J05", "name": "视觉设计师", "category": "设计",
+      "context": "出图、调性、视觉判断",
+      "narrative": ["审美", "细节", "版本"],
+      "taskPool": [
+        { "taskId": "T10", "weight": 35 },
+        { "taskId": "T05", "weight": 30 },
+        { "taskId": "T04", "weight": 20 },
+        { "taskId": "T02", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J06", "name": "动效设计师", "category": "设计",
+      "context": "动画、表现、展示效果",
+      "narrative": ["节奏", "表现", "精修"],
+      "taskPool": [
+        { "taskId": "T10", "weight": 40 },
+        { "taskId": "T05", "weight": 25 },
+        { "taskId": "T04", "weight": 20 },
+        { "taskId": "T07", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J07", "name": "产品经理", "category": "产品",
+      "context": "需求、方案、协调推进",
+      "narrative": ["需求", "排期", "判断"],
+      "taskPool": [
+        { "taskId": "T02", "weight": 30 },
+        { "taskId": "T01", "weight": 28 },
+        { "taskId": "T07", "weight": 25 },
+        { "taskId": "T09", "weight": 17 }
+      ]
+    },
+    {
+      "id": "J08", "name": "高级产品经理", "category": "产品",
+      "context": "决策、统筹、跨部门沟通",
+      "narrative": ["统筹", "优先级", "平衡"],
+      "taskPool": [
+        { "taskId": "T01", "weight": 35 },
+        { "taskId": "T03", "weight": 25 },
+        { "taskId": "T07", "weight": 22 },
+        { "taskId": "T09", "weight": 18 }
+      ]
+    },
+    {
+      "id": "J09", "name": "用户研究员", "category": "研究",
+      "context": "访谈、洞察、归纳",
+      "narrative": ["用户", "发现", "验证"],
+      "taskPool": [
+        { "taskId": "T06", "weight": 40 },
+        { "taskId": "T02", "weight": 25 },
+        { "taskId": "T08", "weight": 20 },
+        { "taskId": "T10", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J10", "name": "策略分析师", "category": "策略",
+      "context": "竞品、市场、框架分析",
+      "narrative": ["逻辑", "模型", "方向"],
+      "taskPool": [
+        { "taskId": "T06", "weight": 38 },
+        { "taskId": "T03", "weight": 27 },
+        { "taskId": "T04", "weight": 20 },
+        { "taskId": "T10", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J11", "name": "咨询顾问", "category": "咨询",
+      "context": "结构化表达、问题拆解",
+      "narrative": ["专业", "结构", "说服"],
+      "taskPool": [
+        { "taskId": "T04", "weight": 35 },
+        { "taskId": "T01", "weight": 25 },
+        { "taskId": "T02", "weight": 22 },
+        { "taskId": "T09", "weight": 18 }
+      ]
+    },
+    {
+      "id": "J12", "name": "项目经理", "category": "项目",
+      "context": "排期、协调、推进交付",
+      "narrative": ["压时间", "收口", "稳定"],
+      "taskPool": [
+        { "taskId": "T01", "weight": 32 },
+        { "taskId": "T07", "weight": 30 },
+        { "taskId": "T09", "weight": 23 },
+        { "taskId": "T08", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J13", "name": "运营专员", "category": "运营",
+      "context": "执行、日常维护、数据跟进",
+      "narrative": ["高频", "琐碎", "落地"],
+      "taskPool": [
+        { "taskId": "T07", "weight": 38 },
+        { "taskId": "T08", "weight": 25 },
+        { "taskId": "T02", "weight": 20 },
+        { "taskId": "T09", "weight": 17 }
+      ]
+    },
+    {
+      "id": "J14", "name": "HRBP", "category": "职能",
+      "context": "沟通支持、氛围维护",
+      "narrative": ["关怀", "节奏", "支持"],
+      "taskPool": [
+        { "taskId": "T09", "weight": 40 },
+        { "taskId": "T01", "weight": 25 },
+        { "taskId": "T08", "weight": 20 },
+        { "taskId": "T05", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J15", "name": "创意总监候选生物", "category": "高阶/彩蛋",
+      "context": "看方向、做判断、提标准",
+      "narrative": ["标准", "眼光", "压迫感"],
+      "levelHint": ["L05", "L06", "L07"],
+      "levelHintNote": "该职位建议只在 L05 以上出现，否则设定不成立",
+      "taskPool": [
+        { "taskId": "T04", "weight": 33 },
+        { "taskId": "T01", "weight": 27 },
+        { "taskId": "T05", "weight": 25 },
+        { "taskId": "T06", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J16", "name": "需求驯兽师", "category": "混沌",
+      "context": "接住混乱需求并驯化",
+      "narrative": ["混乱", "驯服", "转译"],
+      "taskPool": [
+        { "taskId": "T01", "weight": 30 },
+        { "taskId": "T03", "weight": 27 },
+        { "taskId": "T07", "weight": 25 },
+        { "taskId": "T05", "weight": 18 }
+      ]
+    },
+    {
+      "id": "J17", "name": "PPT炼金术士", "category": "混沌",
+      "context": "把混乱内容整理成可汇报材料",
+      "narrative": ["美化", "压缩", "变清晰"],
+      "taskPool": [
+        { "taskId": "T04", "weight": 35 },
+        { "taskId": "T02", "weight": 27 },
+        { "taskId": "T05", "weight": 23 },
+        { "taskId": "T10", "weight": 15 }
+      ]
+    },
+    {
+      "id": "J18", "name": "对齐专家", "category": "混沌",
+      "context": "不断同步和统一认知",
+      "narrative": ["共识", "复述", "协调"],
+      "taskPool": [
+        { "taskId": "T01", "weight": 38 },
+        { "taskId": "T09", "weight": 30 },
+        { "taskId": "T08", "weight": 17 },
+        { "taskId": "T07", "weight": 15 }
+      ]
+    }
+  ]
+}

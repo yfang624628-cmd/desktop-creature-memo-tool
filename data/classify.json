@@ -1,0 +1,186 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "note": "便签分类的唯一事实来源。LLM 只负责把一句话映射成下面这三个枚举，调度规则全部是确定的代码。",
+    "boundary": "分类是概率的，调度是确定的。让 LLM 直接决定「几点做」会让整件事不可预测也不可测试——它只填 domain/kind/urgency，剩下的由 policy 表决定。",
+    "degradation": "keyword 分类器是默认实现，永远可用。LLM 是可选的增强层：没有 key、离线、超时、超额，产品都完整可用，只是分得糙一点。"
+  },
+  "schema": {
+    "domain": {
+      "work": "工作上的事。占用工作日的工作时段。",
+      "life": "生活杂事——补办证件、买东西、交费、看医生。不占工作时段。",
+      "self": "自己的事——想学的、想看的、想做的。周末或晚上。"
+    },
+    "kind": {
+      "_note": "决定演什么场景。work 域用前五个，life/self 域用后三个。",
+      "writing": "写东西",
+      "revising": "改东西",
+      "meeting": "开会 / 同步 / 对齐",
+      "talking": "回消息 / 找人 / 沟通",
+      "desk": "在电脑前弄一件说不清具体形状的事",
+      "errand": "要出门办的事",
+      "chore": "杂活 / 家务 / 手续",
+      "rest": "休息 / 玩 / 自己的事"
+    },
+    "urgency": {
+      "now": "一小时内就该动的",
+      "today": "今天要弄的",
+      "soon": "这几天",
+      "someday": "总有一天"
+    }
+  },
+  "policy": {
+    "_status": "当前无消费方。",
+    "_why": "时段分流随便签日程一起删除；countsAsLoad 随状态系统一起删除（没有状态可掉，而且它算出来几乎总是 0，多数便签被判成 soon）。分类层保留但暂时空转——删掉容易，将来想让「买饺子」和「改方案」在画面上不一样时再接回来。"
+  },
+  "keyword": {
+    "_note": "默认分类器。纯关键词，同步，零依赖，永远可用。命中顺序从上到下，第一个中的即停。",
+    "rules": [
+      {
+        "domain": "life",
+        "kind": "errand",
+        "urgency": "soon",
+        "any": [
+          "身份证",
+          "护照",
+          "港澳通行证",
+          "签证",
+          "银行",
+          "社保",
+          "公积金",
+          "医院",
+          "看牙",
+          "体检",
+          "挂号",
+          "快递",
+          "取件",
+          "寄",
+          "剪头发",
+          "驾照",
+          "年检",
+          "报销单"
+        ]
+      },
+      {
+        "domain": "life",
+        "kind": "chore",
+        "urgency": "soon",
+        "any": [
+          "买",
+          "交费",
+          "缴费",
+          "还款",
+          "充值",
+          "续费",
+          "打扫",
+          "洗",
+          "修",
+          "退货",
+          "换货",
+          "预约"
+        ]
+      },
+      {
+        "domain": "self",
+        "kind": "rest",
+        "urgency": "someday",
+        "any": [
+          "想去",
+          "想学",
+          "想看",
+          "想试",
+          "有空",
+          "总有一天",
+          "旅行",
+          "健身",
+          "跑步",
+          "练"
+        ]
+      },
+      {
+        "domain": "work",
+        "kind": "revising",
+        "urgency": "today",
+        "any": [
+          "改",
+          "调",
+          "优化",
+          "重做",
+          "返工",
+          "第几版",
+          "再来一版",
+          "润色",
+          "校对"
+        ]
+      },
+      {
+        "domain": "work",
+        "kind": "meeting",
+        "urgency": "today",
+        "any": [
+          "会",
+          "同步",
+          "对齐",
+          "评审",
+          "汇报",
+          "述职",
+          "复盘",
+          "宣讲",
+          "面试"
+        ]
+      },
+      {
+        "domain": "work",
+        "kind": "talking",
+        "urgency": "now",
+        "any": [
+          "回",
+          "催",
+          "问",
+          "找",
+          "确认",
+          "跟进",
+          "联系",
+          "沟通",
+          "聊",
+          "讲"
+        ]
+      },
+      {
+        "domain": "work",
+        "kind": "writing",
+        "urgency": "today",
+        "any": [
+          "写",
+          "方案",
+          "文档",
+          "稿",
+          "报告",
+          "总结",
+          "计划",
+          "大纲",
+          "PPT",
+          "ppt",
+          "提案",
+          "需求",
+          "周报",
+          "日报"
+        ]
+      }
+    ],
+    "default": {
+      "domain": "work",
+      "kind": "desk",
+      "urgency": "soon"
+    }
+  },
+  "llm": {
+    "_note": "可选增强层。跑 `node tools/classify-llm.mjs` 批量分类，结果写回存档的 note.cls。",
+    "enabled": false,
+    "model": "claude-opus-5",
+    "batchSize": 25,
+    "maxPerDay": 40,
+    "_costNote": "一条便签几十个 token。batchSize 25 + 系统提示词走 prompt cache，日常成本可以忽略。maxPerDay 是防跑飞的闸。",
+    "systemPrompt": "你在给一个人的便签做分类。每条便签是他随手记下的一件事。\n\n对每条便签输出三个字段：\n\ndomain —— 这件事属于哪一块\n  work  工作上的事（写方案、改需求、开会、回同事消息）\n  life  生活杂事（补办证件、买东西、交费、看病、快递）\n  self  他自己的事（想学的、想看的、想去的）\n\nkind —— 具体是什么形状的事\n  work 域用：writing 写 / revising 改 / meeting 开会 / talking 沟通 / desk 说不清形状的案头活\n  life 域用：errand 要出门办的 / chore 杂活手续\n  self 域用：rest 休息玩自己的事\n\nurgency —— 有多急，只看这句话本身透出的紧迫感，不要推测他的日程\n  now      一小时内就该动（有人在等、马上要用）\n  today    今天要弄完\n  soon     这几天\n  someday  没有时间点，总有一天\n\n判断依据只有便签原文。写得含糊就往 soon 靠，不要脑补。原样返回传入的 id。"
+  }
+}

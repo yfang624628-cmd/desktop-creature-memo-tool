@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "version": "2.0",
+    "note": "便签 kind → 它提起这张便签时闪哪个场景。已不再驱动日程。",
+    "removed": "v1.x 的 schedule / copy / rules 段整块删除。便签曾经驱动日程，删掉的理由：它演了 45 分钟「改稿」而那件事并没有被完成，时间点也是系统编的（memo 本来就不设时间）。演出与现实脱钩，且是往「它替你干了」的方向脱钩。现在它有自己的一天，你的便签不进它的日程。"
+  },
+  "kinds": {
+    "writing": {
+      "behavior": "A03"
+    },
+    "revising": {
+      "behavior": "A04"
+    },
+    "meeting": {
+      "behavior": "A02"
+    },
+    "talking": {
+      "behavior": "A06"
+    },
+    "desk": {
+      "behavior": "A05"
+    },
+    "_lifeNote": "life / self 域的三种。消耗比工作轻，而且不计入 notePressure——买速冻饺子不该让它掉状态。",
+    "errand": {
+      "behavior": "A10"
+    },
+    "chore": {
+      "behavior": "A05"
+    },
+    "rest": {
+      "behavior": "A07"
+    }
+  }
+}

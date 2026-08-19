@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>职场生物</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- OOBE 测评 -->
+<div id="oobe" class="oobe" hidden>
+  <div class="oobe-inner">
+    <header class="oobe-head">
+      <p class="oobe-step"><span id="oobe-step">1</span> / 3</p>
+      <h1 id="oobe-prompt">—</h1>
+      <p id="oobe-sub" class="oobe-sub">—</p>
+    </header>
+    <div id="oobe-cards" class="oobe-cards"></div>
+    <footer class="oobe-foot">
+      <button id="oobe-back" class="oobe-back" hidden>上一步</button>
+      <span id="oobe-count" class="oobe-count">—</span>
+      <button id="oobe-next" class="oobe-next" disabled>下一步</button>
+    </footer>
+  </div>
+</div>
+
+<!-- 测评结果 · 定型前唯一可以重抽的地方 -->
+<div id="reveal" class="reveal" hidden>
+  <div class="reveal-inner">
+    <div class="reveal-nav">
+      <button id="reveal-prev" class="reveal-arrow" aria-label="上一只">‹</button>
+      <div class="screen reveal-screen">
+        <div class="screen-inner"><div id="reveal-sprite" class="sprite"></div></div>
+      </div>
+      <button id="reveal-next" class="reveal-arrow" aria-label="下一只">›</button>
+    </div>
+    <p id="reveal-eyebrow" class="reveal-eyebrow">在你身上长出来的是</p>
+    <h1 id="reveal-proto">—</h1>
+    <p id="reveal-strength" class="reveal-strength">—</p>
+    <p id="reveal-cost" class="reveal-cost">—</p>
+    <div class="reveal-meta"><b id="reveal-name">—</b></div>
+    <div class="reveal-btns">
+      <button id="reveal-reroll" class="reveal-reroll">换一只</button>
+      <button id="reveal-go" class="reveal-go">就它了</button>
+    </div>
+    <p id="reveal-hint" class="reveal-hint">定下来之后就不能换了。</p>
+  </div>
+</div>
+
+<!-- 桌宠主体 -->
+<div id="app" hidden>
+
+  <!-- 桌面：便签板在上，它在下面替你拿着这些。两个圆钮直接放下一张空白便签，字就地敲。 -->
+  <section class="desk">
+    <div class="desk-head">
+      <span id="load" class="load">手边空着。</span>
+      <span class="new-notes">
+        <button id="new-yellow" class="new-note new-yellow" aria-label="新建黄色便签" title="新建黄色便签"></button>
+        <button id="new-pink" class="new-note new-pink" aria-label="新建粉色便签" title="新建粉色便签"></button>
+      </span>
+    </div>
+
+    <ul id="notes" class="notes"></ul>
+    <p id="notes-empty" class="notes-empty">写点什么交给它拿着。</p>
+
+    <div class="desk-foot">
+      <button id="open-arch" class="desk-link">回看</button>
+    </div>
+  </section>
+
+  <section class="pet">
+    <div class="pet-stage">
+      <div class="stage-inner">
+        <div id="props" class="props"></div>
+        <div class="layer-pet">
+          <div class="pet-bob">
+            <div class="pet-react"><div id="sprite" class="sprite"></div></div>
+          </div>
+          <div class="pet-shadow"></div>
+        </div>
+      </div>
+    </div>
+    <p id="say" class="say">—</p>
+    <p class="behavior"><span id="impulse" class="impulse" hidden></span></p>
+    <button id="open-dex" class="open-dex">图鉴</button>
+  </section>
+
+  <!-- 图鉴：换一只陪着你的。便签、念头、它记得的事都不会跟着换。 -->
+  <div id="dex" class="dex" hidden>
+    <div class="dex-panel">
+      <header class="dex-head">
+        <h2>图鉴 <span id="dex-count" class="dex-count">—</span></h2>
+        <p id="dex-who" class="dex-who">—</p>
+        <p class="dex-sub">换一只陪着你的。<b>你交给它的东西不会跟着换。</b></p>
+        <div class="dex-bank">
+          <span id="dex-points" class="dex-points">—</span>
+          <button id="dex-roll" class="dex-roll">抽一只</button>
+        </div>
+        <p id="dex-msg" class="dex-msg"></p>
+      </header>
+      <ul id="dex-grid" class="dex-grid"></ul>
+      <footer class="dex-foot">
+        <button id="save-export" class="dex-link">导出存档</button>
+        <button id="save-import" class="dex-link">导入存档</button>
+        <input id="save-file" type="file" accept="application/json" hidden>
+      </footer>
+      <button id="dex-close" class="dex-close" aria-label="关闭">×</button>
+    </div>
+  </div>
+
+  <!-- 回看：读的是勾选那一刻抓下的文字快照，不是便签本体——便签随时可改，回看不能跟着变。 -->
+  <div id="arch" class="arch" hidden>
+    <div class="arch-panel">
+      <header class="arch-head">
+        <h2>回看</h2>
+        <p class="arch-sub">按<b>划掉的那天</b>排。写的是你划掉它时它上面的字。</p>
+      </header>
+      <div class="arch-tabs">
+        <button id="arch-tab-day" class="arch-tab on" data-tab="day">按天</button>
+        <button id="arch-tab-month" class="arch-tab" data-tab="month">按月</button>
+      </div>
+      <div id="arch-view-day" class="arch-view-day">
+        <div id="arch-list" class="arch-list"></div>
+        <p id="arch-empty" class="arch-empty" hidden>还没有可以回看的。</p>
+      </div>
+      <div id="arch-view-month" class="arch-view-month" hidden>
+        <div class="arch-month-head">
+          <button id="arch-month-prev" class="arch-month-nav" aria-label="上个月">‹</button>
+          <span id="arch-month-title" class="arch-month-title">—</span>
+          <button id="arch-month-next" class="arch-month-nav" aria-label="下个月">›</button>
+        </div>
+        <div id="arch-month-grid" class="arch-month-grid"></div>
+        <button id="arch-month-today" class="arch-month-today">回到今天</button>
+      </div>
+      <button id="arch-close" class="arch-close" aria-label="关闭">×</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/classify.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<!-- 桌面壳。浏览器里 window.DESKTOP 不存在，这个文件立刻返回，也不会去下载 desktop.css。 -->
+<script src="desktop/desktop.js"></script>
+</body>
+</html>

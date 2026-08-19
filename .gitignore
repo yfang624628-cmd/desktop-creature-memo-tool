@@ -1,0 +1,33 @@
+# 依赖。315M，装一次就有，不进仓库
+node_modules/
+
+# 导出的存档。里面是真实便签内容，属于隐私——务必别提交
+存档.json
+*.save.json
+save-*.json
+pet-pos.json
+
+# 本机个人配置。Claude Code 的本地权限记录，只对这台机器有意义
+.claude/settings.local.json
+
+# Electron 打包产物
+dist/
+out/
+*.app
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# 调提示词的对照底稿。正本在 ~/Library/Application Support/workplace-creature/文案实验/，
+# 这几条只是防止哪天顺手拷进仓库
+文案实验/
+基线-*.md
+*.local.md
+
+# 设计决策：本地留着，不公开
+设计决策.md
+
+# Python 编译缓存
+__pycache__/
+*.pyc

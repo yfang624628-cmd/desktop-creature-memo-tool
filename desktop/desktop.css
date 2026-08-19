@@ -1,0 +1,217 @@
+/* 桌面壳形态。只有 Electron 里跑起来时 desktop.js 才会挂上这个文件，
+   浏览器版不会下载它——style.css 里一行都不用为桌面版让路。
+
+   总原则：桌面上平时只有它。窗口是透明的，透明的地方点击要落到底下那个窗口上，
+   所以整层默认 pointer-events:none，只有真正画着东西的元素把这项收回来。 */
+
+html.desktop,
+html.desktop body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;          /* 收起形态下便签板会溢出窗口顶边，不能让它长出滚动条 */
+}
+
+/* 桌宠不是网页：拖它的时候不该刷出一片蓝色选区。只有便签里的字例外。 */
+html.desktop { user-select: none; -webkit-user-select: none; }
+html.desktop .note-text { user-select: text; -webkit-user-select: text; }
+
+/* ---------- 常驻形态：只有它 ---------- */
+
+body.desktop #app {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* 它站在窗口底边，上面的东西不够放就往窗口外溢出去（正好被裁掉） */
+  align-items: center;
+  pointer-events: none;
+}
+
+/* 它在下、便签板在上，跟网页版的上下关系一致：
+   先看见你自己交出去的那些东西，再看见替你拿着的它。
+   .pet 内部要重排一次——说的话原本在它下面，桌面版得挪到它上面，紧挨着板子。 */
+body.desktop .pet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+}
+body.desktop .open-dex,
+body.desktop #open-arch { display: none; }   /* 图鉴和按天回看搬进右键菜单了 */
+
+/* 它站在窗口底边，而描边比身体多出一格——不留出这一格，脚底会被窗口切掉 */
+body.desktop .pet-stage { padding-bottom: 16px; }
+
+/* 它说的话（由 desktop.js 挪进板子底边）。
+   原本这两行浮在板子和它之间，也就是直接压在你的壁纸上：11px 的浅灰字
+   在深色壁纸上加多少层柔光都读不了。收进板子里就不用治了——板子自己是实心的，
+   而且板子的底边紧挨着它的头顶，话看上去还是从它那儿出来的。 */
+body.desktop .desk-foot {
+  display: block;
+  padding: 10px 14px 2px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+body.desktop .desk-foot .say {
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 0;
+}
+body.desktop .desk-foot .behavior { margin: 5px 0 0; }
+
+/* ---------- 抠图：给它一圈跟着轮廓走的浅底 ----------
+   网页版它站在 --page 那层浅底色上；搬到桌面，底没了，它直接压在你的壁纸上，
+   深色壁纸上一只深绿的它基本看不见。
+
+   但底色不能是垫在它背后的一块方板——那等于把网页那个窗又搬回来了，
+   桌面上就不再是「一只生物站在那儿」，是「一个方块贴在那儿」。
+   所以是抠图：把轮廓**向外扩一格**——每个画着的格子，在它八个邻居的位置垫一格浅色，
+   并起来正好是沿着轮廓的一圈边。整数格，不模糊，像素语言不破。
+
+   不用改任何绘制代码：::after 挂 z-index:-1，而 .sprite / .props 自己是层叠上下文，
+   负层整体先画——所以**所有**浅色底一定画在**所有**深色格子之前，
+   不会出现某一格的底盖住另一格身体的情况（这是这套做法唯一的坑）。 */
+
+body.desktop .sprite,
+body.desktop .props { isolation: isolate; }
+
+body.desktop .sprite i,
+body.desktop .props i { position: relative; }
+
+body.desktop .sprite i::after,
+body.desktop .props i::after {
+  --halo: var(--page);
+  --halo-w: 3px;          /* 白边宽度。想更利落就调到 2px，想更醒目调到 4px */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* 格子自己那一块也要垫：念头和屏幕光是半透明的（rgba .3），
+     不垫的话它们在桌面上是「透出壁纸」，而不是网页上那种落在浅底上的淡灰 */
+  background: var(--halo);
+  /* 白边宽度独立于 --px */
+  box-shadow:
+    var(--halo-w) 0 0 var(--halo),
+    calc(var(--halo-w) * -1) 0 0 var(--halo),
+    0 var(--halo-w) 0 var(--halo),
+    0 calc(var(--halo-w) * -1) 0 var(--halo),
+    var(--halo-w) var(--halo-w) 0 var(--halo),
+    calc(var(--halo-w) * -1) var(--halo-w) 0 var(--halo),
+    var(--halo-w) calc(var(--halo-w) * -1) 0 var(--halo),
+    calc(var(--halo-w) * -1) calc(var(--halo-w) * -1) 0 var(--halo);
+}
+
+/* 只有它自己吃鼠标。道具（电脑、便签堆）是画上去的布景，点击从那儿穿过去。 */
+body.desktop .layer-pet {
+  pointer-events: auto;
+  cursor: grab;
+}
+body.desktop.dragging .layer-pet { cursor: grabbing; }
+
+/* 说的话跟着板子一起来一起走——它现在就长在板子的底边上（见 .desk-foot）。
+   平时桌面上不该有一行会变的字。 */
+
+/* ---------- 便签板：碰到它才浮出来 ----------
+   收起时不用 display:none——留在文档流里，靠窗口只有它那么大把板子裁在视野外，
+   这样淡入淡出才有得放，也不用等窗口尺寸变完再排版。 */
+
+/* 一眼看得见四张，再多的往下滚——滚动条就是「下面还埋着多少」。
+   4 张 × (80 高 + 10 间距) + 列表自己的 12 上边距 = 372。
+   注意这是「最多看见四张」：字写多了便签会长高，那时候看见的就不到四张，
+   宁可少看见一张，也不要把写下的东西压扁。 */
+body.desktop .notes { max-height: 332px; }   /* 四张 × (70 高 + 10 间距) + 一点余量 */
+
+/* 板子的宽度是定死的，不跟着窗口走：窗口在「只有它」的形态下只有 168 宽，
+   板子跟着缩，便签就被压窄，autosize 会把压窄时的行数写死进高度。
+   252 = SIZE.panel.w（见 desktop/main.js），改一个记得改另一个。 */
+html.desktop { --win: 252px; }
+
+body.desktop .desk {
+  width: var(--win);
+  flex: none;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity .16s ease, transform .16s ease;
+  pointer-events: none;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .13);   /* 它浮在别人的窗口上面，得有个离地的影子 */
+}
+body.desktop[data-mode="panel"] .desk {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* 钉住之后才有的那个叉。没钉住时鼠标一挪开板子自己就收了，不需要它。 */
+.desk-close {
+  display: none;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  margin-left: 2px;
+  border: none;
+  background: none;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--ink-faint);
+}
+.desk-close:hover { color: var(--ink); }
+body.desktop.pinned .desk-close { display: block; }
+
+/* ---------- 图鉴 / 按天回看 ---------- */
+
+/* 网页版那层压暗的蒙版在这儿不成立：窗口是透明的，
+   34% 的黑铺满整窗，在桌面上看就是凭空多出来一块灰色方块（而不是「背景被压暗了」）。
+   桌面上不存在「背景」这个东西，蒙版直接去掉，卡片自己是实心的就够了。 */
+body.desktop .dex,
+body.desktop .arch {
+  pointer-events: auto;
+  background: none;
+  align-items: flex-start;
+  padding: 14px 16px;
+}
+body.desktop .dex-panel,
+body.desktop .arch-panel {
+  max-height: 100%;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .16);
+}
+
+/* 摊开图鉴或回看的时候，底下的便签板让开——两块卡片叠在一起谁也看不清 */
+body.desktop[data-mode="big"] .desk { opacity: 0; pointer-events: none; }
+
+/* ---------- 第一次那三道题 ----------
+   测评和定型页是实心的一整块界面，不透明、可以整块拖着走。 */
+
+body.desktop[data-mode="oobe"] {
+  background: var(--page);
+  border-radius: 10px;
+}
+body.desktop[data-mode="oobe"] .oobe,
+body.desktop[data-mode="oobe"] .reveal { -webkit-app-region: drag; }
+body.desktop[data-mode="oobe"] .ocard,
+body.desktop[data-mode="oobe"] button,
+/* 拖拽区会吃掉滚轮/触控板事件——卡片列表本身不能算在拖拽区里，否则滚不动 */
+body.desktop[data-mode="oobe"] #oobe-cards { -webkit-app-region: no-drag; }
+
+/* 「已经有它了」——浏览器里养过的那只从这儿搬进来，不用重做三道题 */
+.oobe-carry {
+  position: fixed;
+  left: 16px;
+  bottom: 14px;
+  z-index: 5;
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  font-size: 12px;
+  color: var(--ink-faint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.oobe-carry:hover { color: var(--ink-soft); }
+
+body.desktop .toast { pointer-events: none; }

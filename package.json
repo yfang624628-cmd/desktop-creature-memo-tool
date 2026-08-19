@@ -1,0 +1,28 @@
+{
+  "name": "workplace-creature",
+  "version": "0.4.0",
+  "private": true,
+  "description": "职场生物。前端是无构建的 ES5，不依赖 npm——npm 只服务 tools/ 下的离线脚本和 desktop/ 的桌面壳。",
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "yoko",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yfang624628-cmd/desktop-creature-memo-tool.git"
+  },
+  "homepage": "https://github.com/yfang624628-cmd/desktop-creature-memo-tool#readme",
+  "type": "module",
+  "scripts": {
+    "build": "python3 build-data.py",
+    "desktop": "env -u ELECTRON_RUN_AS_NODE electron desktop/main.js",
+    "classify": "node tools/classify-llm.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.0"
+  },
+  "devDependencies": {
+    "electron": "^43.4.0"
+  }
+}

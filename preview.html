@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>轮廓预览</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* 开发用的看图页，不属于产品。20 只并排，各自按自己的节奏动。
+     直接双击打开就行，不用起服务。 */
+  body { padding: 28px 20px 60px; }
+  h1 { font-size: 15px; letter-spacing: 3px; font-weight: 500; margin: 0 0 4px; }
+  .hint { font-size: 12px; color: var(--ink-soft); margin: 0 0 20px; }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .bar button {
+    background: var(--card); border: 1px solid var(--line); border-radius: 5px;
+    padding: 5px 12px; font-size: 12px; color: var(--ink-soft);
+  }
+  .bar button.on { background: #fff; color: var(--accent); border-color: var(--bezel); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .cell { text-align: center; }
+  .cell .screen-inner { padding: 12px; }
+  .cap { margin-top: 7px; font-size: 12px; color: var(--ink); }
+  .kw  { font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
+
+  /* 放大看单格。像素轮廓的毛病基本都要放大才看得见 */
+  body.big { --px: 11px; }
+  body.big .grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+</style>
+</head>
+<body>
+
+<h1>轮廓预览</h1>
+<p class="hint">开发用。改完 <code>js/sprites.js</code> 刷新即可，不碰存档、不影响应用里那只。</p>
+
+<div class="bar">
+  <button id="t-big">放大</button>
+  <button id="t-blink">闭眼</button>
+  <button id="t-grid">显示网格</button>
+</div>
+
+<div id="grid" class="grid"></div>
+
+<script src="js/data.js"></script>
+<script src="js/sprites.js"></script>
+<script>
+(function () {
+  'use strict';
+  var PROTOS = window.GAME_DATA.prototypes.prototypes;
+  var blink = false, showGrid = false;
+  var hosts = [];        // {el, id} —— 每只自己按 idle.stepMs 走帧
+
+  function paint(host, id, frame) {
+    var sp = window.SPRITES[id];
+    host.innerHTML = '';
+    if (!sp) return;
+    var g = sp.body.map(function (r) { return r.split(''); });
+    if (!blink) (sp.eyes || []).forEach(function (p) { g[p[0]][p[1]] = '.'; });
+    (sp.mouth || []).forEach(function (p) { g[p[0]][p[1]] = '.'; });
+    if (sp.idle) {
+      var f = sp.idle.frames[(frame || 0) % sp.idle.frames.length];
+      f.forEach(function (p) { g[p[0]][p[1]] = '#'; });
+    }
+
+    var frag = document.createDocumentFragment();
+    for (var y = 0; y < 16; y++) {
+      for (var x = 0; x < 16; x++) {
+        if (g[y][x] !== '#' && !showGrid) continue;
+        var d = document.createElement('i');
+        if (g[y][x] !== '#') d.style.background = 'rgba(56,69,44,.07)';
+        d.style.gridArea = (y + 1) + '/' + (x + 1);
+        frag.appendChild(d);
+      }
+    }
+    host.appendChild(frag);
+  }
+
+  function render() {
+    var host = document.getElementById('grid');
+    host.innerHTML = '';
+    PROTOS.forEach(function (p) {
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.innerHTML =
+        '<div class="screen"><div class="screen-inner"><div class="sprite"></div></div></div>' +
+        '<div class="cap">' + p.id + ' ' + p.name + '</div>' +
+        '<div class="kw">' + p.keywords.join(' · ') + '</div>';
+      var el = cell.querySelector('.sprite');
+      paint(el, p.id, 0);
+      hosts.push({ el: el, id: p.id, n: 0 });
+      host.appendChild(cell);
+    });
+    tickAll();
+  }
+
+  /* 每只按自己的 stepMs 走。共用一个 25ms 的心跳，各自算该不该翻帧——
+     20 个 setInterval 会互相错开成一锅粥。 */
+  var beat = null;
+  function tickAll() {
+    if (beat) clearInterval(beat);
+    var t0 = Date.now();
+    beat = setInterval(function () {
+      var now = Date.now();
+      hosts.forEach(function (h) {
+        var sp = window.SPRITES[h.id];
+        if (!sp || !sp.idle) return;
+        var n = Math.floor((now - t0) / sp.idle.stepMs);
+        if (n === h.n) return;
+        h.n = n;
+        paint(h.el, h.id, n);
+      });
+    }, 25);
+  }
+
+  function toggle(btn, fn) {
+    btn.addEventListener('click', function () { fn(); btn.classList.toggle('on'); render(); });
+  }
+  toggle(document.getElementById('t-big'),   function () { document.body.classList.toggle('big'); });
+  toggle(document.getElementById('t-blink'), function () { blink = !blink; });
+  toggle(document.getElementById('t-grid'),  function () { showGrid = !showGrid; });
+
+  render();
+})();
+</script>
+</body>
+</html>

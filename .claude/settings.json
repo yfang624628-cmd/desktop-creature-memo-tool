@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 build-data.py)",
+      "Bash(curl -s http://localhost:4173/*)",
+      "Bash(curl -sI http://localhost:4173/*)",
+      "Bash(open \"http://localhost:4173/index.html\")",
+      "Bash(node --check js/*.js)",
+      "Bash(node --check desktop/*.js)",
+      "Bash(node --check tools/*.mjs)"
+    ]
+  }
+}
