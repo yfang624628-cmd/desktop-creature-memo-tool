@@ -1,20 +1,21 @@
-# 文案与形象：CC BY-NC 4.0
+# 文案与美术资产许可：CC BY-NC 4.0
 
 Copyright (c) 2026 yoko
 
-代码是 MIT（见 LICENSE）。以下内容不是代码，走
-**知识共享 署名-非商业性使用 4.0 国际（CC BY-NC 4.0）**：
+本仓库的代码部分遵循 MIT 协议（见 [LICENSE](LICENSE)）。以下列出的文案与美术资产
+不适用 MIT 协议，而是遵循**知识共享 署名-非商业性使用 4.0 国际协议
+（CC BY-NC 4.0）**：
 
 https://creativecommons.org/licenses/by-nc/4.0/deed.zh
 
-| 文件 | 受约束的部分 |
+| 文件 | 受约束内容 |
 |---|---|
-| `data/*.json` | 全部文案，含 `riff.json` / `dayplan.json` / `classify.json` 里的提示词 |
-| `js/data.js` | 由 `data/*.json` 生成，同样受约束 |
+| `data/*.json` | 全部文案，含 `riff.json`、`dayplan.json`、`classify.json` 中的提示词 |
+| `js/data.js` | 由 `data/*.json` 构建生成，同样受此协议约束 |
 | `js/sprites.js` | 20 个像素形象及其设定 |
-| `README.md`、`设计决策.md` | 正文 |
+| `README.md`、`设计决策.md` | 正文内容 |
 
-其余（引擎、渲染、桌面壳、构建脚本、样式）走 MIT。
+其余部分（引擎、渲染逻辑、桌面壳、构建脚本、样式表）遵循 MIT 协议。
 
-简单说：可以自己用、改、二次创作、公开讲它怎么做的，注明出处即可；
-不要用在收费产品或以营利为目的的场景。想商用请先问一声。
+**授权范围**：允许个人使用、修改与二次创作，并允许在注明出处的前提下公开分享或
+讲述其实现方式；禁止用于收费产品或以营利为目的的场景。如需商业使用，请事先联系作者获得授权。
