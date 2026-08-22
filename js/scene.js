@@ -54,18 +54,13 @@
     '##########'
   ];
 
-  /* 5×9：屏幕占满上半身，下面三行实心边框放 Home 键。
-   * Home 键和屏幕之间必须隔一整行实心的，否则两块浅色会连成一片。 */
-  var PHONE = [
-    '#####',
-    '#+++#',
-    '#+++#',
-    '#+++#',
-    '#+++#',
-    '#+++#',
-    '#####',
-    '##+##',
-    '#####'
+  // 摸鱼摸出一条真鱼：身子一个菱形，尾巴在右边分叉，跟其他道具一样不描边、整块画
+  var FISH = [
+    '..##...',
+    '.####.#',
+    '######.',
+    '.####.#',
+    '..##...'
   ];
 
   var BOWL = [
@@ -73,6 +68,32 @@
     '#########',
     '#########',
     '..#####..'
+  ];
+
+  // 闲着的那杯茶：凉了，没人管，搁在那儿。跟 BOWL 一样实心，但不冒热气——
+  // 这个状态本来就是「什么都没在干」，道具可以在，但不能动，一动就不是闲着了
+  var MUG = [
+    '.####.',
+    '#####.',
+    '######',
+    '#####.',
+    '.####.'
+  ];
+
+  /* 锅：盖和身分开画，盖才能被顶得一跳一跳——锅在烧，光冒气跟 BOWL 那碗饭分不开。
+   * 除了把手那一行，其余各行一律齐平：宽度一路 2→8→10→6→4 地跳，读出来是个蘑菇不是锅。
+   * 把手各探出 2 格（只探 1 格是毛刺），盖靠上面那颗钮认，不靠比锅身宽。 */
+  var POT_LID = [
+    '....##....',
+    '..######..'
+  ];
+  // 把手不放在最上面一行：盖一跳，满宽的那行就跟锅身断开，单看像张桌子。
+  // 挪到中段，盖子就是从同宽的锅沿上抬起来的。
+  var POT_BODY = [
+    '..######..',
+    '##########',
+    '..######..',
+    '..######..'
   ];
 
   // 尾巴朝左下——指着生物那边，否则读起来是个显示器不是气泡
@@ -104,6 +125,59 @@
     '.#.',
     '#..',
     '###'
+  ];
+
+  // 通勤：车厢一个实心方块，两个窗、两个轮子探出底边。车不动，甩在后面的速度线动
+  var BUS = [
+    '.######.',
+    '#++++++#',
+    '#++++++#',
+    '########',
+    '.#....#.'
+  ];
+
+  /* 月亮：加班和失眠共用的「这会儿是深夜」标记。四角对称削会读成十字——
+   * 试过 '.##.'/'####'/'####'/'.##.'，四个角一样缺，正好是十字的定义。
+   * 只削一个角，不对称，才不会拼出那个形状，顺便像缺了一块的月亮。 */
+  var MOON = [
+    '.##',
+    '###',
+    '###'
+  ];
+
+  // 电视：天线是两撇朝外斜的短划，光靠矩形加屏幕会跟 LAPTOP 撞脸，这个尖角是唯一的区分点
+  var TV = [
+    '.######.',
+    '#++++++#',
+    '#++++++#',
+    '#++++++#',
+    '########'
+  ];
+
+  // 被子：一个隆起的实心块。呼吸靠它整体上下移一格，不靠形状变化
+  var BLANKET = [
+    '..######..',
+    '.########.',
+    '##########'
+  ];
+
+  // 摊开的书：中缝留空，两页各画一半。翻页角在左右页之间切换
+  var BOOK = [
+    '.##.##.',
+    '#++.++#',
+    '#++.++#',
+    '#++.++#',
+    '#######'
+  ];
+
+  // 小闹钟：跟 LAPTOP 一样，边框实心、表盘是亮的屏幕色。表针是一个暗点在盘面上移动——
+  // 跟 MINI_LAPTOP 屏幕上那个敲字的点是同一套手法，不是新发明一种「亮点叠亮点」会糊掉的画法。
+  var CLOCK = [
+    '.####.',
+    '#++++#',
+    '#++++#',
+    '#++++#',
+    '.####.'
   ];
 
   var NOTE = [
@@ -174,6 +248,22 @@
         if (s[y].charAt(x) === '#') put(PROP_COL + 2 + x, top + 1 + y, false);
   }
 
+  // 通勤：车不动，甩在车后的速度线跟着窗户的高度一格格换，读成「车在往前冲」
+  function drawCommute(f) {
+    var top = FLOOR - BUS.length + 1;
+    blitFloor(BUS, PROP_COL + 1);
+    var row = top + 1 + (f % 3);
+    put(PROP_COL - 1, row, false);
+    put(PROP_COL - 2, row, false);
+  }
+
+  // 加班：还是那台电脑，肩上多一个月亮——这个点了还在打，才是加班和深度工作的区别
+  function drawOvertime(f) {
+    drawLaptop(f);
+    // 隔开两行空的再画月亮——贴着电脑顶边画会跟顶边糊成一个奇怪的缺角，得留出「浮在半空」的距离
+    blit(MOON, PROP_COL + 3, FLOOR - LAPTOP.length - MOON.length - 2);
+  }
+
   // 一行字：隔一格画一格。整行填满会读成一条实心杠，不像字
   function textRow(row, from, to) {
     for (var x = from; x <= to; x++) if (x % 2) put(PROP_COL + x, row, false);
@@ -236,16 +326,13 @@
     }
   }
 
-  /* 摸鱼：屏幕上的内容一条条往上滚。每条长短不一，才像内容不像进度条。 */
-  function drawPhone(f) {
-    var top = FLOOR - PHONE.length + 1;
-    blitFloor(PHONE, PROP_COL + 3);
-    var feed = [1, 1, 0, 1, 0, 0];                 // 一段内容、一段空隙，循环着往上走
-    for (var y = 0; y < 5; y++) {
-      if (!feed[(y + f) % feed.length]) continue;
-      var w = ((y + f) % 3) ? 3 : 2;
-      for (var x = 0; x < w; x++) put(PROP_COL + 4 + x, top + 1 + y, false);
-    }
+  /* 摸鱼：不用手机演了，干脆真的有条鱼在旁边游——这个词本来就是这么来的。
+   * 飘在半空、不贴地：它是凭空游过来的，不是桌上的东西，这点不实反而是这只鱼的笑点。 */
+  function drawFish(f) {
+    var DX = [0, 1, 2, 1, 0, -1, -2, -1];
+    var DY = [0, 0, 1, 0, 0, 0, -1, 0];
+    var s = Math.floor(f / 2) % DX.length;         // 比其他道具慢半拍，像悠游不像乱窜
+    blit(FISH, PROP_COL + 1 + DX[s], FLOOR - FISH.length - 2 + DY[s]);
   }
 
   // 吃饭：冒热气
@@ -260,6 +347,27 @@
     }
   }
 
+  // 做饭：锅盖被里面顶得一跳一跳，蒸汽从盖钮那儿往上走
+  function drawCooking(f) {
+    blitFloor(POT_BODY, PROP_COL);
+    var bodyTop = FLOOR - POT_BODY.length + 1;
+    var jump = (f % 5) === 0 ? 1 : 0;                // 五帧顶一下，一直跳就成了没盖严
+    var lidTop = bodyTop - POT_LID.length - jump;
+    blit(POT_LID, PROP_COL, lidTop);
+
+    var drift = [0, 1, 2, 1];
+    for (var i = 0; i < 3; i++) {
+      var x = PROP_COL + 4 + drift[(f + i) % 4];
+      put(x, lidTop - 1 - i, true);
+      put(x + 1, lidTop - 1 - i, true);
+    }
+  }
+
+  // 闲着：那杯茶就搁在那儿，没有第二个动作
+  function drawMug() {
+    blitFloor(MUG, PROP_COL + 2);
+  }
+
   // 睡着：Z 一个一个升上去。间距必须拉开，挨太近三个 Z 会连成一条锯齿链
   function drawSleep(f) {
     for (var i = 0; i < 2; i++) {
@@ -267,6 +375,54 @@
       if (age < 0 || age > 4) continue;
       blit(ZED, PROP_COL + 2 + age * 2, FLOOR - 5 - age * 2);
     }
+  }
+
+  // 醒着但没起：不能冒 Z——那是睡着专属的。换成被子整体起伏，读成呼吸
+  function drawLingering(f) {
+    var top = FLOOR - BLANKET.length + 1;
+    var breathe = (f % 8) < 4 ? 0 : 1;
+    blit(BLANKET, PROP_COL + 1, top - breathe);
+  }
+
+  // 失眠：被子还在，月亮挂着，Z 才冒一半就掉回去——想睡但没睡着，
+  // 跟 drawSleep 那一串完整升上去的 Z 得是明显不一样的节奏
+  function drawInsomnia(f) {
+    var top = FLOOR - BLANKET.length + 1;
+    blit(BLANKET, PROP_COL + 1, top);
+    blit(MOON, PROP_COL + 6, top - 6);
+    var age = f % 10;
+    if (age < 3) blit(ZED, PROP_COL + 4 + age, top - 2 - age);
+  }
+
+  // 下班恢复：窝着看电视，画面里有个东西慢慢挪，不是信号中断的静止画面
+  function drawTV(f) {
+    var top = FLOOR - TV.length + 1;
+    blitFloor(TV, PROP_COL);
+    put(PROP_COL, top - 2, false);          // 天线两撇，往两边斜着支出去
+    put(PROP_COL + 1, top - 1, false);
+    put(PROP_COL + 7, top - 2, false);
+    put(PROP_COL + 6, top - 1, false);
+
+    var x = f % 5;
+    put(PROP_COL + 1 + x, top + 2, false);
+    put(PROP_COL + 2 + x, top + 2, false);
+  }
+
+  // 忙自己的事：翻书，折角在左右页之间慢慢切换。节奏比写字慢得多——读东西不赶
+  function drawReading(f) {
+    var top = FLOOR - BOOK.length + 1;
+    blitFloor(BOOK, PROP_COL + 1);
+    var onRight = (f % 16) < 8;
+    put(PROP_COL + 1 + (onRight ? 5 : 1), top + 1, false);
+  }
+
+  // 在想明天：表针在亮着的盘面上慢慢走一圈，不是真的看时间，只是偶尔想起
+  function drawThinking(f) {
+    var top = FLOOR - CLOCK.length + 1;
+    blitFloor(CLOCK, PROP_COL + 2);
+    var hand = [[2, 1], [4, 2], [2, 3], [1, 2]];
+    var p = hand[Math.floor(f / 3) % hand.length];
+    put(PROP_COL + 2 + p[0], top + p[1], false);
   }
 
   /* ---------- 便签堆：手里拿着几件，桌上就堆几张 ---------- */
@@ -319,19 +475,27 @@
     A04: drawRevising,
     A05: drawLaptop,
     A06: drawMeeting,
-    A07: drawPhone,
+    A07: drawFish,
     A08: drawBowl,
     A09: drawSleep,
-    A10: drawPhone,
+    A10: drawTV,
+    A13: drawCommute,
+    A14: drawOvertime,
+    A15: drawInsomnia,
+    A16: drawCooking,
     W01: drawSleep,
-    W02: drawSleep,
-    W03: drawWriting,
-    W04: null,
-    W05: null
+    W02: drawLingering,
+    W03: drawReading,
+    W04: drawMug,
+    W05: drawThinking
   };
 
   // 打电脑和写字的时候，生物本体会跟着小幅抖——这是「在动手」的关键
-  var BUSY = { A03: 1, A04: 1, A05: 1 };
+  var BUSY = { A03: 1, A04: 1, A05: 1, A14: 1 };
+
+  // 真的睡着的状态——跟这两个共用 drawSleep 的 Z 是同一个判断标准。
+  // 失眠（A15）不算：它就是没睡着，眼睛不该被强制闭上
+  var SLEEP = { A09: 1, W01: 1 };
 
   // chatter 会在这两个状态里切去敲电脑。A05 本来画的就是电脑，再换一台小的只会看着像闪
   var CHATTER_SWAP = { A03: 1, A04: 1 };
@@ -419,6 +583,9 @@
 
     // 停下来的时候身体也不该抖
     isBusy: function () { return !!BUSY[state.behavior] && !paused(); },
+
+    // 真睡着的时候眼睛该一直闭着，不是眨一下——ui.js 画本体眼睛时读这个
+    isAsleep: function () { return !!SLEEP[state.behavior]; },
 
     // 每 100ms 调一次，场景帧走得慢一些——便签下落需要足够多的中间帧，
     // 否则会看成瞬移；而屏幕闪字走太快就成了噪点。

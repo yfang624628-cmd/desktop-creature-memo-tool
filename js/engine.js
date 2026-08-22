@@ -584,6 +584,11 @@
 
   var WEEKEND_BEHAVIOR = { wnight: 'W01', wmorning: 'W02', wafternoon: 'W04', wevening: 'W04', wlate: 'W04' };
 
+  /* 加班、失眠：跟周日恐惧（W05）同一套办法——按「今天/今晚 + 这只生物」算一个确定性种子，
+   * 不查任务表也不用 Math.random。同一晚反复刷新永远是同一个结论，翻篇了才可能换。 */
+  function overtimeTonight(c, ts) { return seeded(dateKey(ts) + ':' + c.prototypeId, 'overtime') < 0.32; }
+  function insomniaTonight(c, ts) { return seeded(dateKey(ts) + ':' + c.prototypeId, 'insomnia') < 0.30; }
+
   function behaviorOf(c, ts) {
     var ph = phaseAt(minOfDay(ts), ts);
     if (isWeekend(ts)) {
@@ -599,7 +604,20 @@
     }
     if (c.plannedBehavior && ts < c.plannedBehavior.until) return c.plannedBehavior.id;
     if (c.activeTaskId && TASK2BEHAVIOR[c.activeTaskId]) return TASK2BEHAVIOR[c.activeTaskId];
-    if (ph === 'night' || ph === 'evening') return 'A10';
+
+    var mod = minOfDay(ts);
+    // 通勤（去）：早间刚开始那一小段，比早饭早，不会跟它撞
+    if (ph === 'dawn' && mod - hm2min(RULES.phases.map.dawn.start) < 20) return 'A13';
+    /* 晚上是一条线：下班 → 路上 → 到家做饭 → 瘫着。
+     * 加班的夜里这条线整条都不走——它连往家走的那一步都还没到，回到家也不会再开火了。 */
+    if (ph === 'evening') {
+      var into = mod - hm2min(RULES.phases.map.evening.start);
+      if (overtimeTonight(c, ts)) return into < 90 ? 'A14' : 'A10';
+      if (into < 20) return 'A13';    // 通勤（回）
+      if (into < 60) return 'A16';    // 到家先开火
+      return 'A10';
+    }
+    if (ph === 'night') return insomniaTonight(c, ts) ? 'A15' : 'A10';
     if (ph === 'lunch') return 'A08';
     return 'A01';
   }

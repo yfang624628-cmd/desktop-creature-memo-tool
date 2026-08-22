@@ -37,13 +37,37 @@
     return out;
   }
 
-  function paintSprite(host, protoId) {
+  // 这一格所在的那段实心有多宽。闭眼的横线要画在够宽的地方才不会把剪影戳断
+  function runWidth(row, x) {
+    if (row.charAt(x) !== '#') return 0;
+    var a = x, b = x;
+    while (a > 0 && row.charAt(a - 1) === '#') a--;
+    while (b < row.length - 1 && row.charAt(b + 1) === '#') b++;
+    return b - a + 1;
+  }
+
+  /* mode 由调用方给，不在这儿读它此刻的状态——图鉴和揭晓页画的是「这个原型长什么样」，
+   * 跟工位上那只在不在睡觉无关，读全局会让整个图鉴跟着一起闭眼。
+   *   不传   睁着（图鉴、揭晓页）
+   *   blink  眨眼那 140ms：眼睛填回实心。太短，看的人自己会脑补成眨了一下
+   *   sleep  睡着：挖成两格横线。填实心一直保持着只是一张没五官的脸，读不出闭眼 */
+  function paintSprite(host, protoId, mode) {
     var sp = window.SPRITES[protoId];
     host.innerHTML = '';
     if (!sp) return;
-    var blinking = Date.now() < blinkUntil;
     var grid = sp.body.map(function (r) { return r.split(''); });
-    if (!blinking) sp.eyes.forEach(function (p) { if (grid[p[0]]) grid[p[0]][p[1]] = '.'; });
+    if (mode === 'sleep') {
+      sp.eyes.forEach(function (p) {
+        var row = grid[p[0]];
+        if (!row) return;
+        row[p[1]] = '.';
+        // 拿原始 body 量宽度：不然第一只眼睛挖完，第二只量到的就是被挖过的脸。
+        // 窄脸的原型（脸才 4 格宽）画不下横线，画了会把剪影捅破
+        if (runWidth(sp.body[p[0]], p[1]) >= 6 && row[p[1] + 1] === '#') row[p[1] + 1] = '.';
+      });
+    } else if (mode !== 'blink') {
+      sp.eyes.forEach(function (p) { if (grid[p[0]]) grid[p[0]][p[1]] = '.'; });
+    }
     (sp.mouth || []).forEach(function (p) { if (grid[p[0]]) grid[p[0]][p[1]] = '.'; });
     partCells(sp).forEach(function (p) { if (grid[p[0]]) grid[p[0]][p[1]] = '#'; });
 
@@ -75,7 +99,14 @@
     setTimeout(function () { clearInterval(tick); drawSprite(); }, total + 60);
   }
 
-  function drawSprite() { if (C) paintSprite($('#sprite'), C.prototypeId); }
+  // 只有工位上那只跟着状态走。睡着优先于眨眼——已经闭着了，没什么好眨的
+  function drawSprite() {
+    if (!C) return;
+    var mode = '';
+    if (window.SCENE && window.SCENE.isAsleep()) mode = 'sleep';
+    else if (Date.now() < blinkUntil) mode = 'blink';
+    paintSprite($('#sprite'), C.prototypeId, mode);
+  }
 
   function scheduleBlink() {
     setTimeout(function () {
