@@ -98,7 +98,10 @@ function createWindow() {
 
   // 浮在普通窗口之上，但不去打扰全屏应用——你在全屏写东西的时候它不该杵在那儿
   win.setAlwaysOnTop(true, 'floating');
-  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false });
+  /* 这里必须是 false。macOS 的全屏应用自己就是一个独立桌面空间，
+   * 一旦允许窗口「加入所有空间」，这个标记会压过 visibleOnFullScreen，
+   * 它就照样飘在全屏窗口上面。代价是它只留在自己那块桌面，不跟着你换空间。 */
+  win.setVisibleOnAllWorkspaces(false, { visibleOnFullScreen: false });
 
   /* Dock 藏起来之后菜单栏也跟着没了，Cmd+C/V/Z 会失效。
    * 这个产品的全部内容都是打字打出来的，这几个键必须手动接回来。 */
