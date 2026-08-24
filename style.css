@@ -4,20 +4,35 @@
  * 界面只有三块：它 / 你交给它的东西 / 它说过的话。
  */
 
+/* 界面文字用的点阵字体。12px 网格——字号只能是 12px 或 24px，
+   写 10 / 11 / 13 都会糊成一团。层级靠颜色和字距分，不靠字号。
+   你自己写的字（便签正文、它说的话）不吃这个字体，走苹方。 */
+@font-face {
+  font-family: 'FusionPixel';
+  src: url('fonts/fusion-pixel-12px.woff2') format('woff2');
+  font-display: block;
+}
+
 :root {
+  --px-font:  'FusionPixel', 'PingFang SC', sans-serif;
   --lcd-bg:   #c7d3b4;
   --lcd-ink:  #38452c;
+  --lcd-soft: rgba(56, 69, 44, .55);
+  --lcd-dim:  rgba(56, 69, 44, .38);
+  --lcd-line: rgba(56, 69, 44, .22);
 
   --page:     #eceae4;
   --card:     #f7f6f2;
   --paper:    #fbf7e8;   /* 便签纸 */
 
   /* 两种便签。功能上完全一样，差别只在它怎么反应：
-     黄色堆成地上的纸（有重量），粉色飘成头顶的泡泡（没有重量）。 */
-  --note-yellow:      #fbf5dc;
-  --note-yellow-line: #e7dcb6;
-  --note-pink:        #fbeced;
-  --note-pink-line:   #ecd3d5;
+     yellow 堆成地上的纸（有重量），pink 飘成头顶的泡泡（没有重量）。
+     颜色已经不是黄和粉了，是深绿和浅绿——变量名和 js 里的 color 键一起留着没改。
+     深的那个更沉，对应有重量；两个分居屏底色 --lcd-bg 两侧，隔远也分得出。 */
+  --note-yellow:      #a3b788;
+  --note-yellow-line: #8a9e71;
+  --note-pink:        #e4ecd7;
+  --note-pink-line:   #b3c69a;
 
   --line:     #d8d5cc;
   --bezel:    #6f7a5c;
@@ -208,7 +223,7 @@ button { font: inherit; cursor: pointer; }
 }
 .behavior {
   margin: 8px 0 0;
-  font-size: 11px;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
   letter-spacing: 2px;
   color: var(--ink-faint);
   padding: 0 16px;
@@ -219,7 +234,7 @@ button { font: inherit; cursor: pointer; }
 /* 计划外的那一下。比状态本身淡一档——它是补充，不是状态本身，
  * 抢过前半句就变成两条并列的信息了。前面那个「·」用伪元素带出来，
  * 没有内容的时候整个 span 是 hidden，点也就跟着不见。 */
-.impulse { color: var(--ink-soft); opacity: .72; }
+.impulse { font-family: -apple-system, 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-size: 11px; color: var(--ink-soft); opacity: .72; }
 .impulse::before { content: ' · '; color: var(--ink-faint); opacity: .6; }
 .impulse.in { animation: impulse-in .5s ease-out; }
 @keyframes impulse-in {
@@ -233,9 +248,9 @@ button { font: inherit; cursor: pointer; }
  * 一块板子：顶栏 + 一摞可以拖来拖去的便签。没有输入框——新建就是桌上多一张空白的纸。 */
 
 .desk {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background: var(--lcd-bg);
+  border: 3px solid var(--bezel);
+  border-radius: 6px;
   padding: 0 0 8px;
 }
 
@@ -245,21 +260,21 @@ button { font: inherit; cursor: pointer; }
   justify-content: space-between;
   gap: 10px;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--lcd-line);
 }
-.load { font-size: 12px; color: var(--ink-soft); }
+.load { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
 
-/* 两个圆钮就是新建。钮本身是那张纸的颜色——不用写字解释它是什么。 */
+/* 两个方块就是新建。钮本身是那张纸的颜色——不用写字解释它是什么。
+   圆角在一块像素屏上说不通，整格的方块才是这里的语言。 */
 .new-notes { display: flex; gap: 8px; flex: none; }
 .new-note {
-  width: 15px; height: 15px; padding: 0;
-  border-radius: 50%;
+  width: 14px; height: 14px; padding: 0;
   transition: transform .12s ease;
 }
 .new-note:hover { transform: scale(1.16); }
 .new-note:active { transform: scale(.92); }
-.new-yellow { background: var(--note-yellow); border: 1px solid var(--note-yellow-line); }
-.new-pink   { background: var(--note-pink);   border: 1px solid var(--note-pink-line); }
+.new-yellow { background: var(--note-yellow); border: 2px solid var(--bezel); }
+.new-pink   { background: var(--note-pink);   border: 2px solid var(--bezel); }
 
 .notes {
   list-style: none;
@@ -270,8 +285,8 @@ button { font: inherit; cursor: pointer; }
 }
 .notes-empty {
   margin: 14px 0 4px;
-  font-size: 12px;
-  color: var(--ink-faint);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  color: var(--lcd-dim);
   text-align: center;
 }
 
@@ -292,9 +307,8 @@ button { font: inherit; cursor: pointer; }
   margin: 0 auto 10px;
   background: var(--note-yellow);
   border: 1px solid var(--note-yellow-line);
-  border-radius: 3px;
-  padding: 9px 20px 9px 5px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, .04);
+  padding: 9px 20px 20px 5px;        /* 底下这一截是留给右下角那行天数的：12px 的点阵字比原来那个 10px 高 */
+  box-shadow: 2px 2px 0 rgba(56, 69, 44, .16);   /* 纸是压在屏上的，影子不能是柔的 */
   transition: opacity .3s ease;
 }
 .note-pink { background: var(--note-pink); border-color: var(--note-pink-line); }
@@ -305,10 +319,9 @@ button { font: inherit; cursor: pointer; }
   align-self: stretch;
   width: 11px;
   margin: -9px 2px -9px -5px;
-  border-radius: 3px 0 0 3px;
   cursor: grab;
   opacity: .3;
-  background: radial-gradient(rgba(0, 0, 0, .5) .8px, transparent .9px) 50% 50% / 5px 5px;
+  background: radial-gradient(rgba(56, 69, 44, .6) 1px, transparent 1.1px) 50% 50% / 4px 4px;
   transition: opacity .15s ease;
 }
 .note:hover .note-grip { opacity: .55; }
@@ -336,11 +349,10 @@ button { font: inherit; cursor: pointer; }
   width: 14px; height: 14px;
   margin-top: 2px;
   padding: 0;
-  border: 1px solid #b9b2a0;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, .7);
+  border: 2px solid var(--lcd-soft);
+  background: rgba(255, 255, 255, .55);
 }
-.note-box:hover { border-color: var(--accent); }
+.note-box:hover { border-color: var(--bezel); }
 
 /* 便签本体就是这块 textarea——随时可以改，改完不重渲染。
    高度由 ui.js 按 scrollHeight 顶开，所以这里必须 overflow:hidden 且不给 resize。 */
@@ -357,15 +369,16 @@ button { font: inherit; cursor: pointer; }
 .note-text::placeholder { color: rgba(0, 0, 0, .16); }
 
 .note-age {
-  position: absolute; right: 8px; bottom: 6px;
-  font-size: 10px; color: var(--ink-faint);
+  position: absolute; right: 7px; bottom: 5px;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  color: rgba(56, 69, 44, .42);
 }
 
 .note-x {
-  position: absolute; right: 5px; top: 4px;
-  background: none; border: none; padding: 0 2px;
+  position: absolute; right: 5px; top: 5px;
+  background: none; border: none; padding: 2px;
   color: transparent;
-  font-size: 14px; line-height: 1.3;
+  line-height: 0;
 }
 .note:hover .note-x { color: var(--ink-faint); }
 .note-x:hover { color: var(--ink); }
@@ -376,8 +389,8 @@ button { font: inherit; cursor: pointer; }
   display: flex; align-items: center; justify-content: center; gap: 10px;
   margin: 2px 0;
   padding: 7px 8px;
-  font-size: 12px;
-  color: var(--ink-faint);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  color: var(--lcd-dim);
   animation: undo-in .22s ease-out;
 }
 @keyframes undo-in {
@@ -387,16 +400,16 @@ button { font: inherit; cursor: pointer; }
 .note-undo-btn {
   background: none; border: none; padding: 0;
   font: inherit;
-  color: var(--ink-soft);
+  color: var(--lcd-soft);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
 }
-.note-undo-btn:hover { color: var(--ink); }
+.note-undo-btn:hover { color: var(--lcd-ink); }
 
-/* 放久了的：纸会旧。只有黄色会旧——粉色没有「拖了几天」这回事 */
-.note.stale { background: #f6efdc; border-color: #ded3b3; }
-.note.stale .note-age { color: #a2916a; }
+/* 放久了的：纸会旧。只有 yellow 会旧——pink 没有「拖了几天」这回事 */
+.note.stale { background: #93a878; border-color: #7c9161; }
+.note.stale .note-age { color: rgba(56, 69, 44, .62); }
 
 /* 划掉：多行之后线不能再用一根 ::after 横过去了（textarea 也没有伪元素），
    改用 text-decoration 逐行划。只有刚划掉的那张会淡入（.struck），
@@ -552,7 +565,7 @@ button { font: inherit; cursor: pointer; }
   border: 1px solid var(--line);
   border-radius: 5px;
   padding: 4px 14px;
-  font-size: 11px;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
   letter-spacing: 2px;
   color: var(--ink-faint);
 }
@@ -564,33 +577,34 @@ button { font: inherit; cursor: pointer; }
   padding: 20px;
   background: rgba(53, 54, 47, .34);
 }
+/* 图鉴整页都是像素精灵，本来就是 --lcd-ink 画的。
+   之前摊在白卡片上一直有点别扭，进屏里才是回家。宽度同 .arch-panel，跟着 --win。 */
 .dex-panel {
   position: relative;
-  width: 100%; max-width: 460px; max-height: 82vh;
+  width: var(--win); max-width: 100%; max-height: 82vh;
   overflow-y: auto;
-  background: var(--page);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 20px 18px 22px;
+  background: var(--lcd-bg);
+  border: 3px solid var(--bezel);
+  border-radius: 6px;
+  padding: 12px 12px 14px;
 }
-.dex-head h2 { margin: 0; font-size: 15px; letter-spacing: 3px; font-weight: 500; }
-.dex-sub { margin: 6px 0 16px; font-size: 12px; color: var(--ink-soft); line-height: 1.7; }
-.dex-sub b { font-weight: 500; color: var(--ink); }
+.dex-head h2 { margin: 0; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 4px; font-weight: 400; color: var(--lcd-ink); }
+.dex-sub { margin: 6px 0 10px; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); line-height: 1.7; }
+.dex-sub b { font-weight: 400; color: var(--lcd-ink); }
 
 .dex-grid {
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px;
 }
 .dex-item {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 12px 6px 10px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  padding: 7px 2px 6px;
+  background: none;
+  border: 2px solid rgba(56, 69, 44, .28);
   cursor: pointer;
 }
-.dex-item:hover { border-color: var(--ink-faint); }
-.dex-item.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: #fff; }
+.dex-item:hover { border-color: var(--lcd-soft); }
+.dex-item.on { border-color: var(--lcd-ink); box-shadow: inset 0 0 0 2px var(--lcd-ink); }
 
 /* 图鉴里的缩略图用 3px 一格——16 格正好 48px */
 .dex-sprite {
@@ -600,60 +614,62 @@ button { font: inherit; cursor: pointer; }
 }
 .dex-sprite i { display: block; background: var(--lcd-ink); }
 
-.dex-name { font-size: 12px; }
-.dex-kw   { font-size: 9px; color: var(--ink-faint); text-align: center; line-height: 1.5; }
+.dex-name { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-ink); }
+/* 一个词一行。三个词并排放不下 70px 的格子，会从词中间折断 */
+.dex-kw   { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.dex-kw i { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; font-style: normal; line-height: 1.4; color: var(--lcd-dim); }
 
 .dex-close {
-  position: absolute; top: 10px; right: 12px;
-  background: none; border: none; padding: 4px;
-  font-size: 18px; line-height: 1; color: var(--ink-faint);
+  position: absolute; top: 11px; right: 11px;
+  background: none; border: none; padding: 2px;
+  line-height: 0; color: var(--lcd-dim);
 }
-.dex-close:hover { color: var(--ink); }
+.dex-close:hover { color: var(--lcd-ink); }
 
 /* 图鉴：收集册 */
-.dex-count  { font-size: 11px; color: var(--ink-faint); letter-spacing: 1px; margin-left: 6px; }
-.dex-bank   { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
-.dex-points { font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.dex-count  { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); letter-spacing: 1px; margin-left: 6px; }
+.dex-bank   { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; padding-bottom: 10px; border-bottom: 1px solid var(--lcd-line); }
+.dex-points { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-ink); }
 .dex-roll {
-  background: var(--accent); color: #fff;
-  border: 1px solid var(--accent); border-radius: 5px;
-  padding: 5px 14px; font-size: 12px;
+  background: var(--lcd-ink); color: var(--lcd-bg);
+  border: 2px solid var(--lcd-ink);
+  padding: 4px 8px; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
 }
-.dex-roll:disabled { background: none; color: #b5b2a8; border-color: var(--line); cursor: default; }
+.dex-roll:disabled { background: none; color: var(--lcd-dim); border-color: var(--lcd-dim); cursor: default; }
 .dex-msg {
-  margin: 0 0 12px; min-height: 18px;
-  font-size: 12px; line-height: 1.6; color: var(--ink-soft);
+  margin: 0 0 10px; min-height: 18px;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; line-height: 1.6; color: var(--lcd-soft);
   opacity: 0; transition: opacity .3s ease;
 }
 .dex-msg.on  { opacity: 1; }
-.dex-msg.got { color: var(--accent); }
+.dex-msg.got { color: var(--lcd-ink); }
 
 /* 没抽到的：只留剪影 */
-.dex-item.locked { cursor: default; opacity: .55; }
-.dex-item.locked:hover { border-color: var(--line); }
-.dex-item.locked .dex-sprite i { background: var(--line); }
-.dex-item.locked .dex-name { color: var(--ink-faint); letter-spacing: 1px; }
+.dex-item.locked { cursor: default; }
+.dex-item.locked, .dex-item.locked:hover { border-color: transparent; }
+.dex-item.locked .dex-sprite i { background: rgba(56, 69, 44, .3); }
+.dex-item.locked .dex-name { color: rgba(56, 69, 44, .35); letter-spacing: 1px; }
 
-.dex-foot { display: flex; gap: 14px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.dex-foot { display: flex; gap: 14px; margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--lcd-line); }
 .dex-link {
   background: none; border: none; padding: 0;
-  font-size: 11px; color: var(--ink-faint); text-decoration: underline;
-  text-underline-offset: 3px; text-decoration-color: var(--line);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-dim); text-decoration: underline;
+  text-underline-offset: 3px; text-decoration-color: var(--lcd-line);
 }
-.dex-link:hover { color: var(--ink-soft); }
+.dex-link:hover { color: var(--lcd-soft); }
 
-.dex-who { margin: 2px 0 10px; font-size: 12px; color: var(--ink-soft); letter-spacing: 1px; }
+.dex-who { margin: 4px 0 8px; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
 
 /* ---------- 回看 ---------- */
 
 .desk-foot { margin-top: 10px; text-align: center; }
 .desk-link {
   background: none; border: none; padding: 4px 6px;
-  font: inherit; font-size: 11px; letter-spacing: 2px;
-  color: var(--ink-faint); cursor: pointer;
-  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 2px;
+  color: var(--lcd-dim); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--lcd-line);
 }
-.desk-link:hover { color: var(--ink-soft); }
+.desk-link:hover { color: var(--lcd-soft); }
 
 .arch {
   position: fixed; inset: 0; z-index: 20;
@@ -661,25 +677,25 @@ button { font: inherit; cursor: pointer; }
   padding: 20px;
   background: rgba(53, 54, 47, .34);
 }
+/* 宽度直接跟着 --win 走，跟便签板永远一样宽——网页 228、桌面 252，不用两处维护。
+   回看是它替你记在机器里的东西，所以是一块屏，用的就是 .screen 那套。 */
 .arch-panel {
   position: relative;
-  width: 100%; max-width: 460px; max-height: 82vh;
+  width: var(--win); max-width: 100%; max-height: 82vh;
   overflow-y: auto;
-  background: var(--page);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 20px 18px 22px;
+  background: var(--lcd-bg);
+  border: 3px solid var(--bezel);
+  border-radius: 6px;
+  padding: 12px 12px 14px;
 }
-.arch-head h2 { margin: 0; font-size: 15px; letter-spacing: 3px; font-weight: 500; }
-.arch-sub { margin: 6px 0 18px; font-size: 12px; color: var(--ink-soft); line-height: 1.7; }
-.arch-sub b { font-weight: 500; color: var(--ink); }
-.arch-empty { margin: 24px 0; text-align: center; font-size: 12px; color: var(--ink-faint); }
+.arch-head h2 { margin: 0; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 4px; font-weight: 400; color: var(--lcd-ink); }
+.arch-empty { margin: 24px 0; text-align: center; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-dim); }
 .arch-close {
-  position: absolute; top: 10px; right: 12px;
-  background: none; border: none; padding: 4px 8px;
-  font-size: 16px; line-height: 1; color: var(--ink-faint); cursor: pointer;
+  position: absolute; top: 11px; right: 11px;
+  background: none; border: none; padding: 2px;
+  line-height: 0; color: var(--lcd-dim); cursor: pointer;
 }
-.arch-close:hover { color: var(--ink); }
+.arch-close:hover { color: var(--lcd-ink); }
 
 .arch-day { margin-bottom: 20px; }
 .arch-day:last-child { margin-bottom: 0; }
@@ -687,68 +703,71 @@ button { font: inherit; cursor: pointer; }
    它只是「那天有这些」，不是一个给你打分的数字 */
 .arch-day-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  padding-bottom: 6px; margin-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  padding-bottom: 5px; margin-bottom: 6px;
+  border-bottom: 1px solid var(--lcd-line);
 }
-.arch-day-title { font-size: 12px; font-weight: 500; letter-spacing: 2px; color: var(--ink); }
-.arch-day-count { font-size: 11px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.arch-day-title { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; font-weight: 400; letter-spacing: 1px; color: var(--lcd-ink); }
+.arch-day-count { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
 
 .arch-items { list-style: none; margin: 0; padding: 0; }
 /* 这里全是已经划掉的，所以不画删除线——那会变成一整页横杠。
    颜色只留一点痕迹：当时用的是哪张纸。 */
 .arch-item {
   display: flex; align-items: baseline; gap: 8px;
-  padding: 4px 0 4px 8px;
-  border-left: 2px solid transparent;
-  font-size: 13px; line-height: 1.65; color: var(--ink);
+  padding: 3px 0 3px 7px;
+  border-left: 3px solid transparent;
+  font-size: 12px; line-height: 1.6; color: var(--lcd-ink);   /* 这些是你写的字，留苹方 */
 }
 .arch-yellow { border-left-color: var(--note-yellow-line); }
 .arch-pink   { border-left-color: var(--note-pink-line); }
-.arch-mark { flex: none; width: 12px; text-align: center; font-size: 11px; color: var(--ink-faint); }
+.arch-mark { flex: none; line-height: 0; margin-top: 4px; color: var(--lcd-soft); }
 .arch-text { flex: 1; white-space: pre-wrap; }
 
 /* ---------- 按天 / 按月 切换 ---------- */
 
-.arch-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+/* 屏上的选中态是反白，不是下划线——液晶只有亮和不亮两种状态 */
+.arch-tabs { display: flex; gap: 3px; margin: 11px 0; }
 .arch-tab {
-  background: none; border: none; cursor: pointer;
-  font: inherit; font-size: 12px; letter-spacing: 2px; color: var(--ink-faint);
-  padding: 0 2px 8px; margin-right: 14px;
-  border-bottom: 2px solid transparent;
+  flex: 1; cursor: pointer;
+  background: none; border: 2px solid var(--lcd-dim);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 2px; color: var(--lcd-soft);
+  padding: 4px 0;
 }
-.arch-tab:hover { color: var(--ink-soft); }
-.arch-tab.on { color: var(--ink); border-bottom-color: var(--accent); }
+.arch-tab:hover { color: var(--lcd-ink); border-color: var(--lcd-soft); }
+.arch-tab.on { color: var(--lcd-bg); background: var(--lcd-ink); border-color: var(--lcd-ink); }
 
 /* ---------- 按月回看 ----------
    数字只报当天划掉了几件，不上色分级——那会变成一张给自己打分的表。 */
 
-.arch-month-head { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 14px; }
-.arch-month-title { font-size: 13px; letter-spacing: 2px; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 84px; text-align: center; }
+.arch-month-head { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 9px; }
+.arch-month-title { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 1px; color: var(--lcd-ink); min-width: 96px; text-align: center; }
 .arch-month-nav {
   background: none; border: none; cursor: pointer;
-  width: 22px; height: 22px; line-height: 1;
-  font-size: 15px; color: var(--ink-soft);
+  padding: 4px 6px; line-height: 0; color: var(--lcd-soft);
 }
-.arch-month-nav:hover { color: var(--ink); }
-.arch-month-nav:disabled { color: var(--ink-faint); opacity: .4; cursor: default; }
+.arch-month-nav:hover { color: var(--lcd-ink); }
+.arch-month-nav:disabled { color: var(--lcd-dim); opacity: .4; cursor: default; }
 
-.arch-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-.arch-month-wd { text-align: center; font-size: 10px; color: var(--ink-faint); padding-bottom: 6px; }
+/* 日期和计数同一个字号（12px 网格只有这一档），差别全在明度上：
+   计数压到最暗的一档，让它明确退到日期后面去。 */
+.arch-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.arch-month-wd { text-align: center; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-dim); padding-bottom: 5px; }
 .arch-month-cell {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px; aspect-ratio: 1; border-radius: 6px;
+  height: 30px;
 }
 .arch-month-cell.blank { visibility: hidden; }
-.arch-month-day { font-size: 11px; font-weight: 400; color: var(--ink-soft); }
-.arch-month-cell.today .arch-month-day { color: var(--ink); font-weight: 600; }
-.arch-month-cell.today { background: var(--card); border: 1px solid var(--line); }
-.arch-month-n { font-size: 10px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.arch-month-day { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; line-height: 1; color: var(--lcd-ink); }
+.arch-month-cell.today { background: var(--lcd-ink); }
+.arch-month-cell.today .arch-month-day { color: var(--lcd-bg); }
+.arch-month-cell.today .arch-month-n { color: rgba(199, 211, 180, .68); }
+.arch-month-n { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; line-height: 1; margin-top: 2px; color: rgba(56, 69, 44, .33); }
 
 .arch-month-today {
-  display: block; margin: 16px auto 0;
+  display: block; margin: 12px auto 0;
   background: none; border: none; cursor: pointer;
-  font: inherit; font-size: 11px; letter-spacing: 2px;
-  color: var(--ink-faint); text-decoration: underline;
-  text-underline-offset: 4px; text-decoration-color: var(--line);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 2px;
+  color: var(--lcd-soft); text-decoration: underline;
+  text-underline-offset: 4px; text-decoration-color: var(--lcd-line);
 }
-.arch-month-today:hover { color: var(--ink-soft); }
+.arch-month-today:hover { color: var(--lcd-ink); }

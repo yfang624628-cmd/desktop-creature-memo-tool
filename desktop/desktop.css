@@ -52,7 +52,7 @@ body.desktop .pet-stage { padding-bottom: 16px; }
 body.desktop .desk-foot {
   display: block;
   padding: 10px 14px 2px;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--lcd-line);
   text-align: center;
 }
 body.desktop .desk-foot .say {
@@ -62,7 +62,10 @@ body.desktop .desk-foot .say {
   line-height: 1.6;
   min-height: 0;
 }
-body.desktop .desk-foot .behavior { margin: 5px 0 0; }
+body.desktop .desk-foot .say { color: var(--lcd-ink); }
+/* 板子底色从纸换成了液晶绿，--ink-faint 那档灰在绿上基本读不出来 */
+body.desktop .desk-foot .behavior { margin: 5px 0 0; color: var(--lcd-soft); }
+body.desktop .desk-foot .impulse { color: var(--lcd-soft); }
 
 /* ---------- 抠图：给它一圈跟着轮廓走的浅底 ----------
    网页版它站在 --page 那层浅底色上；搬到桌面，底没了，它直接压在你的壁纸上，
@@ -156,11 +159,10 @@ body.desktop[data-mode="panel"] .desk {
   margin-left: 2px;
   border: none;
   background: none;
-  font-size: 15px;
-  line-height: 1;
-  color: var(--ink-faint);
+  line-height: 0;
+  color: var(--lcd-dim);
 }
-.desk-close:hover { color: var(--ink); }
+.desk-close:hover { color: var(--lcd-ink); }
 body.desktop.pinned .desk-close { display: block; }
 
 /* ---------- 图鉴 / 按天回看 ---------- */

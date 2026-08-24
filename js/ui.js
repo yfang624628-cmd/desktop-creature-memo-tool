@@ -16,6 +16,19 @@
     return n;
   };
 
+  /* 整格画出来的图标。✓ × ‹ › 这些字符在 12px 网格上都是歪的，
+   * 而且各家字体给的形状不一样——像素界面里它们必须自己画。
+   * fill 用 currentColor，颜色仍然由 CSS 管。 */
+  function pxIcon(cells, w, h, unit) {
+    var r = cells.map(function (c) {
+      return '<rect x="' + c[0] + '" y="' + c[1] + '" width="1" height="1"/>';
+    }).join('');
+    return '<svg width="' + (w * unit) + '" height="' + (h * unit) + '" viewBox="0 0 ' + w + ' ' + h +
+           '" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">' + r + '</svg>';
+  }
+  var ICON_CHECK = pxIcon([[0,2],[1,3],[2,4],[3,3],[4,2],[5,1]], 6, 6, 2);
+  var ICON_CROSS = pxIcon([[0,0],[1,1],[2,2],[3,3],[4,4],[4,0],[3,1],[1,3],[0,4]], 5, 5, 2);
+
   /* ---------- 像素角色 ---------- */
 
   var blinkUntil = 0;
@@ -356,7 +369,8 @@
       var age = noteAge(n, now);
       if (age && !n.doneAt) li.appendChild(el('span', 'note-age', age));
 
-      var x = el('button', 'note-x', '×');
+      var x = el('button', 'note-x');
+      x.innerHTML = ICON_CROSS;
       x.setAttribute('aria-label', '拿走');
       x.addEventListener('click', function () { onDrop(n.id); });
       li.appendChild(x);
@@ -613,7 +627,9 @@
       paintSprite(cell, has ? p.id : 'UNKNOWN');   // 没解锁的一律同一个形状，别泄露轮廓
       li.appendChild(cell);
       li.appendChild(el('span', 'dex-name', has ? p.name : '???'));
-      li.appendChild(el('span', 'dex-kw', has ? p.keywords.join(' · ') : ''));
+      var kw = el('span', 'dex-kw');
+      if (has) p.keywords.forEach(function (w) { kw.appendChild(el('i', null, w)); });
+      li.appendChild(kw);
       if (has) li.addEventListener('click', function () { dexPick(p.id); });
       host.appendChild(li);
     });
@@ -659,7 +675,9 @@
       var ul = el('ul', 'arch-items');
       d.items.forEach(function (item) {
         var li = el('li', 'arch-item arch-' + item.color);
-        li.appendChild(el('span', 'arch-mark', '✓'));
+        var mk = el('span', 'arch-mark');
+        mk.innerHTML = ICON_CHECK;
+        li.appendChild(mk);
         li.appendChild(el('span', 'arch-text', item.text));
         ul.appendChild(li);
       });

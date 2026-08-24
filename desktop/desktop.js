@@ -184,7 +184,10 @@
       var x = document.createElement('button');
       x.className = 'desk-close';
       x.setAttribute('aria-label', '收起');
-      x.textContent = '×';
+      x.innerHTML = '<svg width="10" height="10" viewBox="0 0 5 5" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">'
+        + '<rect x="0" y="0" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/>'
+        + '<rect x="3" y="3" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/>'
+        + '<rect x="3" y="1" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/></svg>';
       x.addEventListener('click', unpin);
       head.appendChild(x);
     }
