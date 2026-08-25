@@ -483,6 +483,9 @@
     A14: drawOvertime,
     A15: drawInsomnia,
     A16: drawCooking,
+    // 三顿饭共用一只碗：状态栏已经写明是哪顿，再画三种相似的食物只会更难分
+    A17: drawBowl,
+    A18: drawBowl,
     W01: drawSleep,
     W02: drawLingering,
     W03: drawReading,

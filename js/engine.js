@@ -576,11 +576,22 @@
 
   /* ---------- 派生展示状态 ---------- */
 
+  // T12 不在表里：三顿饭都是它，映射到哪个状态得看几点，见 mealBehavior
   var TASK2BEHAVIOR = {
     T01: 'A02', T02: 'A03', T03: 'A03', T04: 'A03', T05: 'A04', T06: 'A05',
-    T07: 'A06', T08: 'A05', T09: 'A06', T10: 'A05', T11: 'A07', T12: 'A08',
+    T07: 'A06', T08: 'A05', T09: 'A06', T10: 'A05', T11: 'A07',
     T13: 'A07', T14: 'A09', T15: 'A10', T17: 'A07'
   };
+
+  /* 早饭 / 午饭 / 晚饭共用 T12 这一个任务，是哪顿只能按时钟分。
+   * 用时钟不用时段：周末走的是另一套时段名（wmorning/wafternoon…），
+   * 时段名两边对不上，小时数两边都成立。 */
+  function mealBehavior(ts) {
+    var m = minOfDay(ts);
+    if (m < hm2min('11:00')) return 'A17';
+    if (m < hm2min('16:00')) return 'A08';
+    return 'A18';
+  }
 
   var WEEKEND_BEHAVIOR = { wnight: 'W01', wmorning: 'W02', wafternoon: 'W04', wevening: 'W04', wlate: 'W04' };
 
@@ -593,6 +604,8 @@
     var ph = phaseAt(minOfDay(ts), ts);
     if (isWeekend(ts)) {
       if (dayTypeOf(ts) === 'sunday' && new Date(ts).getHours() >= RULES.dayTypes.sunday.dread.fromHour) return 'W05';
+      // 周末那两顿（12:30 / 19:00）本来一直被下面的时段兜底盖掉，从没显示出来过
+      if (c.activeTaskId === 'T12') return mealBehavior(ts);
       // 刚做完爱好活动的 90 分钟内算「在忙自己的事」。
       // 不能只看 log[0]——吃饭之类的日志会把爱好顶下去。
       for (var i = 0; i < c.log.length && i < 6; i++) {
@@ -603,18 +616,22 @@
       return WEEKEND_BEHAVIOR[ph] || 'W04';
     }
     if (c.plannedBehavior && ts < c.plannedBehavior.until) return c.plannedBehavior.id;
+    if (c.activeTaskId === 'T12') return mealBehavior(ts);
     if (c.activeTaskId && TASK2BEHAVIOR[c.activeTaskId]) return TASK2BEHAVIOR[c.activeTaskId];
 
     var mod = minOfDay(ts);
     // 通勤（去）：早间刚开始那一小段，比早饭早，不会跟它撞
     if (ph === 'dawn' && mod - hm2min(RULES.phases.map.dawn.start) < 20) return 'A13';
-    /* 晚上是一条线：下班 → 路上 → 到家做饭 → 瘫着。
-     * 加班的夜里这条线整条都不走——它连往家走的那一步都还没到，回到家也不会再开火了。 */
+    /* 晚上是一条线：下班 → 路上 → 到家做饭 → 吃 → 瘫着。
+     * 加班的夜里这条线整条都不走——它连往家走的那一步都还没到，回到家也不会再开火了。
+     * 晚饭留在这条线里，不做成 09:30 早饭那样的固定日程：查任务排在这条线前面，
+     * 固定一个 20:00 的饭点会把加班从中间截断。 */
     if (ph === 'evening') {
       var into = mod - hm2min(RULES.phases.map.evening.start);
       if (overtimeTonight(c, ts)) return into < 90 ? 'A14' : 'A10';
       if (into < 20) return 'A13';    // 通勤（回）
       if (into < 60) return 'A16';    // 到家先开火
+      if (into < 90) return 'A18';    // 吃自己做的那顿
       return 'A10';
     }
     if (ph === 'night') return insomniaTonight(c, ts) ? 'A15' : 'A10';
