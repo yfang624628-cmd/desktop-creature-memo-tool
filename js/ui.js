@@ -180,7 +180,7 @@
       '调子：' + p.tone,
       '职位：' + (job ? job.name : '—'),
       '职级：' + ((lv && lv.name) || C.levelId),
-      '今天：' + ['周日','周一','周二','周三','周四','周五','周六'][new Date(now).getDay()],
+      '今天：' + E.todayLabel(now),
       '它手边替人拿着 ' + open.length + ' 件，形状是：' + shapeOfLoad(),
       '最老的那件放了 ' + oldest + ' 天',
       '今天新接了 ' + addedToday + ' 件，划掉了 ' + doneToday + ' 件'

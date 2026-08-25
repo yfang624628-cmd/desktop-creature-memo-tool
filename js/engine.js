@@ -8,7 +8,8 @@
   var D = global.GAME_DATA;
   var RULES = D.rules, PROTOS = D.prototypes.prototypes, JOBS = D.jobs.jobs,
       TASKS = D.tasks.tasks, EVENTS = D.events.events, COMBOS = D.combos.combos,
-      COPY = D.copy, ASSESS = D.assessment, NOTES = D.notes, NOTEMAP = D.notemap, GACHA = D.gacha;
+      COPY = D.copy, ASSESS = D.assessment, NOTES = D.notes, NOTEMAP = D.notemap, GACHA = D.gacha,
+      CAL = D.calendar;
 
   var SAVE_KEY = 'workplace-creature/v1';
   var LOCAL_KEY = 'workplace-creature/local';
@@ -58,10 +59,57 @@
   }
   function minOfDay(ts) { var d = new Date(ts); return d.getHours() * 60 + d.getMinutes(); }
 
+  var WEEKDAY_NAME = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+  function ymd(key) { var p = key.split('-'); return new Date(+p[0], +p[1] - 1, +p[2], 12); }
+  function nextDay(ts) { var d = new Date(ts); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + 1); return d.getTime(); }
+
+  /* 日历表里没有的年份，下面三个函数一起退回「周末休、周一到周五上班」。 */
+  function calYear(ts) {
+    var y = CAL && CAL.years && CAL.years[String(new Date(ts).getFullYear())];
+    return y || null;
+  }
+  function holidayOf(ts) {
+    var y = calYear(ts); if (!y) return null;
+    var k = dateKey(ts), hs = y.holidays || [];                  // dateKey 是 YYYY-MM-DD，可以直接比大小
+    for (var i = 0; i < hs.length; i++) if (k >= hs[i].from && k <= hs[i].to) return hs[i];
+    return null;
+  }
+  function isMakeupWorkday(ts) {
+    var y = calYear(ts);
+    return !!(y && (y.workdays || []).indexOf(dateKey(ts)) >= 0);
+  }
+
+  /* 今天休不休。不管明天。 */
+  function restingOn(ts) {
+    if (isMakeupWorkday(ts)) return false;
+    if (holidayOf(ts)) return true;
+    return RULES.dayTypes.byWeekday[new Date(ts).getDay()] !== 'weekday';
+  }
+
+  /* saturday 和 sunday 的真正区别是「明天还休不休」，不是星期几。
+   * 没有日历表时结果和以前逐日一致；有表时国庆最后一晚也会恐惧，调休的周六不会。 */
   function dayTypeOf(ts) {
-    return RULES.dayTypes.byWeekday[new Date(ts).getDay()];
+    if (!restingOn(ts)) return 'weekday';
+    return restingOn(nextDay(ts)) ? 'saturday' : 'sunday';
   }
   function isWeekend(ts) { return dayTypeOf(ts) !== 'weekday'; }
+
+  /* 送进「即兴」提示词的那行事实。 */
+  function todayLabel(ts) {
+    var d = new Date(ts);
+    var s = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 ' + WEEKDAY_NAME[d.getDay()];
+    var h = holidayOf(ts);
+    if (h) {
+      var day = Math.round((ymd(dateKey(ts)) - ymd(h.from)) / 86400000) + 1;
+      var total = Math.round((ymd(h.to) - ymd(h.from)) / 86400000) + 1;
+      s += ' · ' + h.name + '假期第 ' + day + ' 天，共 ' + total + ' 天';
+      if (day === total) s += '（最后一天）';
+    } else if (isMakeupWorkday(ts)) {
+      s += ' · 调休上班';
+    }
+    return s;
+  }
 
   function phaseInMap(map, mod, fallback) {
     for (var k in map) {
@@ -1183,7 +1231,7 @@
     NOTEMAP: NOTEMAP,
     behaviorOf: behaviorOf, statusLine: statusLine, impulseOf: impulseOf,
     deskLine: deskLine, resetDeskLine: resetDeskLine,
-    phaseAt: phaseAt, dayTypeOf: dayTypeOf, isWeekend: isWeekend,
+    phaseAt: phaseAt, dayTypeOf: dayTypeOf, isWeekend: isWeekend, todayLabel: todayLabel,
     phaseMeta: phaseMeta, behaviorCopy: behaviorCopy, minOfDay: minOfDay, min2hm: min2hm, hm2min: hm2min,
     TASK: TASK, PROTO: PROTO, JOB: JOB, forcedPrototype: forcedPrototype,
     rollPet: rollPet, GACHA: GACHA, checkPromotion: checkPromotion,

@@ -63,7 +63,7 @@
     }
   },
   "dayTypes": {
-    "_note": "周末和工作日不是同一天：作息、日程、文案全部分开。",
+    "_note": "周末和工作日不是同一天：作息、日程、文案全部分开。byWeekday 只是兜底——法定节假日和调休先查 data/calendar.json。",
     "byWeekday": [
       "sunday",
       "weekday",
@@ -79,7 +79,8 @@
     },
     "saturday": {
       "phaseSet": "weekend",
-      "workSchedule": false
+      "workSchedule": false,
+      "_note": "休息日，且明天还休。"
     },
     "sunday": {
       "phaseSet": "weekend",
@@ -87,7 +88,7 @@
       "dread": {
         "fromHour": 20
       },
-      "dreadNote": "周日恐惧。这是全职场最普遍的共同经验，也是这个产品最该抓住的一刻。"
+      "dreadNote": "周日恐惧。这是全职场最普遍的共同经验，也是这个产品最该抓住的一刻。sunday 的真正含义是「休息日，且明天要上班」——假期最后一晚同样算。"
     }
   },
   "weekendPhases": {

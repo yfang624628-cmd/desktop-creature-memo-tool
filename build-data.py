@@ -4,14 +4,14 @@
 data/*.json 是唯一事实来源。改完 JSON 后运行：
     python3 build-data.py
 """
-import json, pathlib
+import datetime, json, pathlib
 
 root = pathlib.Path(__file__).parent
 src = root / "data"
 out = root / "js" / "data.js"
 out.parent.mkdir(exist_ok=True)
 
-names = ["rules", "prototypes", "jobs", "tasks", "events", "combos", "copy", "assessment", "notes", "notemap", "classify", "gacha", "dayplan", "riff"]
+names = ["rules", "prototypes", "jobs", "tasks", "events", "combos", "copy", "assessment", "notes", "notemap", "classify", "gacha", "dayplan", "riff", "calendar"]
 bundle = {}
 for n in names:
     with open(src / f"{n}.json", encoding="utf-8") as f:
@@ -32,5 +32,13 @@ counts = {
     "事件": len(bundle["events"]["events"]),
     "组合": len(bundle["combos"]["combos"]),
 }
+# 日历表过期不报错，只会悄悄退回「周末休、周一到周五上班」——所以在这里喊一声。
+today = datetime.date.today()
+years = bundle["calendar"]["years"]
+if str(today.year) not in years:
+    print(f"⚠  data/calendar.json 里没有 {today.year} 年，节假日现在只认周末")
+elif today.month >= 11 and str(today.year + 1) not in years:
+    print(f"⚠  该往 data/calendar.json 加 {today.year + 1} 年了（国务院通常 11 月发次年安排）")
+
 print(f"✓ 已生成 {out.relative_to(root)}  ({out.stat().st_size/1024:.1f} KB)")
 print("  " + "  ".join(f"{k}{v}" for k, v in counts.items()))
