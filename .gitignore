@@ -31,3 +31,7 @@ out/
 # Python 编译缓存
 __pycache__/
 *.pyc
+
+# 自用的界面预览页和它的生成器。里面是编的假数据，只为截图用，不公开
+demo.html
+tools/make-demo.mjs

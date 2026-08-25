@@ -10,8 +10,8 @@
 首次启动会进行一次三步测评，从 20 个性格原型中匹配出属于你的那一只——每一只的性格、说话方式与专属动画均不相同，详见下方「测评生成」。
 
 <p align="center">
-  <img src="docs/pet2.jpg" width="300" alt="它站在桌面上"><br>
-  <img src="docs/panel2.jpg" width="300" alt="便签板展开的样子">
+  <img src="docs/pet2.jpg" width="300" alt="它站在桌面上"><br><br>
+  <img src="docs/panel3.jpg" width="900" alt="便签、回看按天、回看按月、图鉴四块界面">
 </p>
 
 
@@ -114,7 +114,7 @@ localStorage.setItem('workplace-creature/local', '{"forcePrototype":"R15"}')
 ## 项目结构
 
 ```
-index.html          主窗口，宽度为 228px 并随便签内容自适应，渲染进程加载的入口文件
+index.html          主窗口，渲染进程加载的入口文件。网页版宽 228px；桌面版宽 252px、屏高固定，内容在屏内滚动
 style.css
 快速启动.command    双击启动应用
 preview.html        开发预览页：并排展示 20 个原型的轮廓与动画，双击打开，无需启动服务

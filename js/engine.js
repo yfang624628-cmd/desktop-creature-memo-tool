@@ -1019,9 +1019,11 @@
     return counts;
   }
 
-  /* 板子顶上那行只报数，不替它说话。 */
+  /* 板子顶上那行只报数，不替它说话。
+   * 两种颜色都算——这行报的是「桌上有几张纸」，不是负载。
+   * 负载（决定它压弯多少、说什么）仍然只看深色，见 loadNotes()。 */
   function loadText(c) {
-    var n = loadNotes(c).length;
+    var n = openNotes(c).filter(function (n) { return n.text; }).length;
     return n ? n + ' 条便签' : '';
   }
 

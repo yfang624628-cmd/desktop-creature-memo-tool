@@ -211,7 +211,8 @@ button { font: inherit; cursor: pointer; }
 
 .say {
   margin: 10px 0 0;
-  font-size: 15px;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  letter-spacing: 2px;
   line-height: 1.75;
   padding: 0 18px;
   min-height: 26px;
@@ -223,7 +224,7 @@ button { font: inherit; cursor: pointer; }
 }
 .behavior {
   margin: 8px 0 0;
-  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  font-size: 11px;
   letter-spacing: 2px;
   color: var(--ink-faint);
   padding: 0 16px;
@@ -262,11 +263,12 @@ button { font: inherit; cursor: pointer; }
   padding: 8px 10px;
   border-bottom: 1px solid var(--lcd-line);
 }
-.load { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
+/* 占满剩下的宽度，把右边那组（两个新建钮 + 叉）顶到最右边去 */
+.load { flex: 1; min-width: 0; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
 
 /* 两个方块就是新建。钮本身是那张纸的颜色——不用写字解释它是什么。
    圆角在一块像素屏上说不通，整格的方块才是这里的语言。 */
-.new-notes { display: flex; gap: 8px; flex: none; }
+.new-notes { display: flex; gap: 6px; flex: none; }
 .new-note {
   width: 14px; height: 14px; padding: 0;
   transition: transform .12s ease;

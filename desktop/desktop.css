@@ -58,7 +58,7 @@ body.desktop .desk-foot {
 body.desktop .desk-foot .say {
   margin: 0;
   padding: 0;
-  font-size: 13px;
+  font-size: 12px;                 /* 点阵字是 12px 网格，13 会糊 */
   line-height: 1.6;
   min-height: 0;
 }
@@ -127,12 +127,30 @@ body.desktop.dragging .layer-pet { cursor: grabbing; }
    4 张 × (80 高 + 10 间距) + 列表自己的 12 上边距 = 372。
    注意这是「最多看见四张」：字写多了便签会长高，那时候看见的就不到四张，
    宁可少看见一张，也不要把写下的东西压扁。 */
-body.desktop .notes { max-height: 332px; }   /* 四张 × (70 高 + 10 间距) + 一点余量 */
 
 /* 板子的宽度是定死的，不跟着窗口走：窗口在「只有它」的形态下只有 168 宽，
    板子跟着缩，便签就被压窄，autosize 会把压窄时的行数写死进高度。
    252 = SIZE.panel.w（见 desktop/main.js），改一个记得改另一个。 */
-html.desktop { --win: 252px; }
+/* 屏是硬件：三种模式共用一个高度，内容多就在屏里滚，内容少就空着。
+   450 是照原来便签板最满时的高度定的（顶栏 32 + 列表 332 + 说话区 58 + 边框内边距），
+   所以四条便签那屏跟以前一样高。--pet-h 是 .pet-stage：padding 16 + 舞台 88 + padding 16。
+   三个数加起来要等于 SIZE.panel.h / SIZE.big.h（620），改一个记得对一下另一个。 */
+html.desktop { --win: 252px; --screen-h: 450px; --pet-h: 120px; }
+
+/* 便签板：固定高，列表在屏内滚，说的话钉在屏底 */
+body.desktop .desk {
+  height: var(--screen-h);
+  display: flex;
+  flex-direction: column;
+}
+body.desktop .desk-head,
+body.desktop .notes-empty,
+body.desktop .desk-foot { flex: none; }
+body.desktop .notes { flex: 1; min-height: 0; }
+
+/* 板子上永远留一个出口。原来只有钉住时才出现，可一旦自动收起那套出了岔子，
+   板子就再也关不掉了——这个叉是兜底，unpin() 无条件关。 */
+body.desktop .desk-close { display: block; }
 
 body.desktop .desk {
   width: var(--win);
@@ -163,25 +181,39 @@ body.desktop[data-mode="panel"] .desk {
   color: var(--lcd-dim);
 }
 .desk-close:hover { color: var(--lcd-ink); }
-body.desktop.pinned .desk-close { display: block; }
 
 /* ---------- 图鉴 / 按天回看 ---------- */
 
 /* 网页版那层压暗的蒙版在这儿不成立：窗口是透明的，
    34% 的黑铺满整窗，在桌面上看就是凭空多出来一块灰色方块（而不是「背景被压暗了」）。
    桌面上不存在「背景」这个东西，蒙版直接去掉，卡片自己是实心的就够了。 */
+/* 底部留出 --pet-h，面板底边就跟便签板底边落在同一条线上，它始终在屏下面露着脸 */
 body.desktop .dex,
 body.desktop .arch {
   pointer-events: auto;
   background: none;
-  align-items: flex-start;
-  padding: 14px 16px;
+  align-items: flex-end;
+  padding: 14px 16px var(--pet-h);
 }
 body.desktop .dex-panel,
 body.desktop .arch-panel {
-  max-height: 100%;
+  height: var(--screen-h);
+  max-height: none;
+  overflow: hidden;                /* 滚动交给里面那一层，屏本身不滚 */
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 8px 26px rgba(0, 0, 0, .16);
 }
+body.desktop .arch-head,
+body.desktop .arch-tabs,
+body.desktop .dex-head,
+body.desktop .dex-foot { flex: none; }
+body.desktop .arch-view-day,
+body.desktop .dex-grid { flex: 1; min-height: 0; overflow-y: auto; }
+
+/* 日历排完还剩一截，「回到今天」落到屏底，不悬在半空 */
+body.desktop .arch-view-month { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+body.desktop .arch-month-today { margin-top: auto; }
 
 /* 摊开图鉴或回看的时候，底下的便签板让开——两块卡片叠在一起谁也看不清 */
 body.desktop[data-mode="big"] .desk { opacity: 0; pointer-events: none; }
