@@ -154,6 +154,7 @@ js/
 tools/                独立运行的离线工具脚本
   classify-llm.mjs    便签分类（当前结果暂无消费方）
   dayplan-llm.mjs     生成「它自己的一天」的内容
+  make-demo.mjs       生成 demo.html：拿假数据渲染四块界面，供截图用。产物不进仓库
 ```
 
 ---
