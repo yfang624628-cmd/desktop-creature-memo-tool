@@ -66,6 +66,8 @@ body.desktop .desk-foot .say { color: var(--lcd-ink); }
 /* 板子底色从纸换成了液晶绿，--ink-faint 那档灰在绿上基本读不出来 */
 body.desktop .desk-foot .behavior { margin: 5px 0 0; color: var(--lcd-soft); }
 body.desktop .desk-foot .impulse { color: var(--lcd-soft); }
+/* 天气比上面两行再淡一档，但仍得是液晶绿那套色——纸上那档灰在绿底上读不出来 */
+body.desktop .desk-foot .weather { margin: 4px 0 0; padding: 0; color: var(--lcd-dim); opacity: 1; }
 
 /* ---------- 抠图：给它一圈跟着轮廓走的浅底 ----------
    网页版它站在 --page 那层浅底色上；搬到桌面，底没了，它直接压在你的壁纸上，

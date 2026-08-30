@@ -83,6 +83,8 @@
     </div>
     <p id="say" class="say">—</p>
     <p class="behavior"><span id="impulse" class="impulse" hidden></span></p>
+    <!-- 天气是外面的事实，单独一行。不并进上面两行——那两行是它说的话 -->
+    <p id="weather" class="weather" hidden></p>
     <button id="open-dex" class="open-dex">图鉴</button>
   </section>
 
@@ -104,6 +106,12 @@
         <button id="save-export" class="dex-link">导出存档</button>
         <button id="save-import" class="dex-link">导入存档</button>
         <input id="save-file" type="file" accept="application/json" hidden>
+      </footer>
+      <!-- 城市存在本机，不进存档：换台电脑打开，那边的天气该是那边的 -->
+      <footer class="dex-foot dex-weather">
+        <input id="city-input" class="city-input" type="text" maxlength="20" placeholder="城市">
+        <button id="city-save" class="dex-link">记住</button>
+        <span id="city-msg" class="city-msg"></span>
       </footer>
       <button id="dex-close" class="dex-close" aria-label="关闭"><svg width="10" height="10" viewBox="0 0 5 5" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/></svg></button>
     </div>
@@ -144,6 +152,7 @@
 <script src="js/sprites.js"></script>
 <script src="js/classify.js"></script>
 <script src="js/scene.js"></script>
+<script src="js/weather.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/ui.js"></script>
 <!-- 桌面壳。浏览器里 window.DESKTOP 不存在，这个文件立刻返回，也不会去下载 desktop.css。 -->

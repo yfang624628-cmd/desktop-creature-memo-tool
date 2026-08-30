@@ -180,6 +180,109 @@
     '.####.'
   ];
 
+  /* ---------- 周末爱好的道具 ----------
+   * 补觉 / 看片 / 看书 / 做饭 / 发呆复用已有的 Z、电视、书、锅、凉茶，这里不再画。 */
+
+  /* 出门走走：一棵树。试过画一串脚印——2×2 的点在实际尺寸下只是几粒散沙，
+   * 连不成「一串」，更别说是脚印。树是块状的，一眼看出人在外面。 */
+  var TREE = [
+    '..####..',
+    '.######.',
+    '########',
+    '########',
+    '.######.',
+    '...##...',
+    '...##...'
+  ];
+
+  var DUMBBELL = [
+    '##......##',
+    '##......##',
+    '##########',
+    '##......##',
+    '##......##'
+  ];
+
+  /* 手柄：豁口要够深够宽才看得出是两个握把——只豁一行读出来是块板子。
+   * 十字键和按键必须直接画进图里当亮格，不能事后拿 put(…, true) 叠上去：
+   * 亮色是半透明的深色，盖在实心块上还是那块实心，等于没画，整个读成一张沙发。 */
+  var GAMEPAD = [
+    '.########.',
+    '##+####+##',
+    '#+++######',
+    '##+####+##',
+    '##......##',
+    '##......##'
+  ];
+
+  // 购物袋：一道拱形提手。两个分开的提手会读成城堡上的垛口
+  var BAG = [
+    '..####..',
+    '.#....#.',
+    '########',
+    '########',
+    '########',
+    '########'
+  ];
+
+  /* 见朋友：两个气泡轮流说话。跟开会那个大气泡不是一回事——那个只有一个，
+   * 且永远没有结论。气泡得画大，5×5 带亮心的小气泡缩下去只剩两团糊的。 */
+  var CHAT = [
+    '.#####.',
+    '#+++++#',
+    '#+++++#',
+    '#+++++#',
+    '.#####.',
+    '.##....'
+  ];
+
+  /* 学点东西：一摞书，不是台灯。台灯的杆再粗也只有 2 格，
+   * 缩到实际尺寸就是一根细棍，读成高脚杯。三块错开的厚板才像摞起来的书。 */
+  var BOOKS = [
+    '.######.',
+    '.######.',
+    '........',
+    '########',
+    '########',
+    '........',
+    '..#####.',
+    '..#####.'
+  ];
+
+  /* 收拾屋子：垃圾桶，不是扫把。扫把画不出来——对称的杆加圆头读成蘑菇
+   * （还正好撞上蘑菇那只原型），改成杆偏一边又读成一个 L。
+   * 桶是块状的，盖比身宽、身往下收，这两处轮廓变化就够认了。 */
+  var BIN = [
+    '########',
+    '.######.',
+    '.######.',
+    '.######.',
+    '.######.',
+    '..####..'
+  ];
+
+  // 竖着的手机。比横着的电视窄得多，一眼分得开
+  var VPHONE = [
+    '#####',
+    '#+++#',
+    '#+++#',
+    '#+++#',
+    '#+++#',
+    '#+++#',
+    '#+++#',
+    '#####'
+  ];
+
+  // 毛线团。4 行的球缩下去只是个疙瘩，得撑到 6 行才有「一团」的体积
+  var YARN = [
+    '..####..',
+    '.######.',
+    '########',
+    '########',
+    '.######.',
+    '..####..'
+  ];
+
   var NOTE = [
     '########',
     '#......#',
@@ -425,6 +528,108 @@
     put(PROP_COL + 2 + p[0], top + p[1], false);
   }
 
+  /* ---------- 周末爱好 ---------- */
+
+  // 出门走走：树冠被风吹得来回偏一格，树干不动
+  function drawWalk(f) {
+    var top = FLOOR - TREE.length + 1;
+    var sway = (f % 8) < 4 ? 0 : 1;
+    blit(TREE, PROP_COL + 1 + sway, top);
+    // 树干跟着回正，不然整棵树平移，看着像树在走
+    for (var y = 5; y < TREE.length; y++) {
+      for (var x = 0; x < TREE[y].length; x++) {
+        if (TREE[y].charAt(x) === '#') put(PROP_COL + 1 + x, top + y, false);
+      }
+    }
+  }
+
+  // 运动：哑铃被举起来又放下。整体上下移，不改形状
+  function drawExercise(f) {
+    var lift = [0, 1, 2, 3, 2, 1];
+    blit(DUMBBELL, PROP_COL, FLOOR - DUMBBELL.length + 1 - lift[f % lift.length]);
+  }
+
+  // 打游戏：两个键交替被按下去——按下的那个填成实心，跟旁边亮着的那个正好反过来
+  function drawGaming(f) {
+    var top = FLOOR - GAMEPAD.length + 1;
+    blitFloor(GAMEPAD, PROP_COL);
+    put(PROP_COL + 7, top + ((f % 6) < 3 ? 1 : 3), false);
+  }
+
+  // 买菜：拎着袋子走，袋子随步子轻轻晃
+  function drawShopping(f) {
+    blitFloor(BAG, PROP_COL + 1 + ((f % 4) < 2 ? 0 : 1));
+  }
+
+  /* 见朋友：两个气泡轮流冒点，一人说一句。
+   * 只能斜着摞，不能并排——道具区从第 27 列到第 37 列只有 11 格，
+   * 并排两个 7 格宽的气泡要 14 格，右边那个会被舞台边裁掉一半。 */
+  function drawFriends(f) {
+    var top = FLOOR - CHAT.length + 1;
+    blit(CHAT, PROP_COL, top);
+    blit(CHAT, PROP_COL + 4, top - 6);
+    var turn = (f % 8) < 4;
+    var bx = turn ? PROP_COL : PROP_COL + 4;
+    var by = turn ? top : top - 6;
+    for (var i = 0; i < 3; i++) put(bx + 2 + i, by + 2, false);
+  }
+
+  // 学东西：一摞书，最上面那本一下一下地翻
+  function drawStudy(f) {
+    var top = FLOOR - BOOKS.length + 1;
+    blitFloor(BOOKS, PROP_COL + 1);
+    if ((f % 6) < 3) put(PROP_COL + 1, top, false);   // 最上面那本掀开一角
+  }
+
+  // 收拾屋子：一样东西从上面掉进桶里，掉完再来一样
+  function drawTidy(f) {
+    var top = FLOOR - BIN.length + 1;
+    blitFloor(BIN, PROP_COL + 1);
+    var drop = f % 7;
+    if (drop < 4) {
+      var y = top - 5 + drop;
+      put(PROP_COL + 4, y, false);
+      put(PROP_COL + 5, y, false);
+    }
+  }
+
+  /* 刷短视频：一条划走，下一条顶上来。
+   * 跟以前那个手机不一样——那个是内容一行行往上滚，这个是整屏换掉，
+   * 一整条暗块从下面推上来，推满就是下一条。 */
+  function drawShorts(f) {
+    var top = FLOOR - VPHONE.length + 1;
+    blitFloor(VPHONE, PROP_COL + 3);
+    var at = f % 8;
+    for (var y = 0; y < 6; y++) {
+      if (y < at - 2) continue;                 // 上一条已经划出去了
+      if (y > at + 1) continue;                 // 下一条还没进来
+      for (var x = 0; x < 3; x++) put(PROP_COL + 4 + x, top + 1 + y, false);
+    }
+  }
+
+  // 做手工：线团不动，线头越抽越长，抽到头又收回去
+  function drawCraft(f) {
+    var top = FLOOR - YARN.length + 1;
+    blitFloor(YARN, PROP_COL);
+    var len = f % 7;
+    for (var i = 0; i < len; i++) {
+      put(PROP_COL + 8 + i, top + 2 + (i % 2), false);
+    }
+  }
+
+  /* 写代码：还是那台电脑，但字不是一行行滚出来的——是一整段一整段冒出来，
+   * 冒完停一下再来一段。跟 A05 深度工作那种匀速滚动是两种节奏。 */
+  function drawVibeCoding(f) {
+    var top = FLOOR - LAPTOP.length + 1;
+    blitFloor(LAPTOP, PROP_COL);
+    var step = f % 8;
+    if (step >= 5) return;                      // 停顿：等下一段
+    for (var y = 0; y <= step && y < 4; y++) {
+      var w = [5, 3, 6, 4][y];
+      for (var x = 0; x < w; x++) put(PROP_COL + 2 + x, top + 1 + y, false);
+    }
+  }
+
   /* ---------- 便签堆：手里拿着几件，桌上就堆几张 ---------- */
 
   function drawStack(open) {
@@ -488,9 +693,23 @@
     A18: drawBowl,
     W01: drawSleep,
     W02: drawLingering,
-    W03: drawReading,
+    W03: drawReading,        // 兜底：老存档没记是哪个爱好时还是这个
     W04: drawMug,
-    W05: drawThinking
+    W05: drawThinking,
+    // 按爱好分出来的。W06/W10/W11 复用补觉、看片、看书已有的道具
+    W06: drawSleep,
+    W07: drawWalk,
+    W08: drawExercise,
+    W09: drawGaming,
+    W10: drawTV,
+    W11: drawReading,
+    W12: drawShopping,
+    W13: drawFriends,
+    W14: drawStudy,
+    W15: drawTidy,
+    W16: drawShorts,
+    W17: drawCraft,
+    W18: drawVibeCoding
   };
 
   // 打电脑和写字的时候，生物本体会跟着小幅抖——这是「在动手」的关键

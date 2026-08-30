@@ -235,12 +235,28 @@
   function render() {
     var now = Date.now();
 
+    // 天气要先推进引擎：下面那句灰字得按今天什么天挑，晚一步就用的是上一轮的天气
+    weatherNow();
+
     // 黑色只放状态，灰色是唯一的文案出口
     sayNow(E.behaviorCopy(E.behaviorOf(C, now)).label);
     impulseNow(E.deskLine(C, now));
 
     refreshLoad();
     renderNotes();
+  }
+
+  /* 外面什么天。没填城市、或者拿不到，整行不显示——不留一行空的占着位置。
+   * 这里只读缓存，不发请求；什么时候去拿由 WEATHER.refresh 自己判断。
+   * 顺手把天气推给引擎：灰字那层要按天气换话，但引擎自己不联网。 */
+  function weatherNow() {
+    if (!window.WEATHER) return;
+    E.setWeather(window.WEATHER.kind());
+    var el = $('#weather');
+    if (!el) return;
+    var text = window.WEATHER.line();
+    el.textContent = text;
+    el.hidden = !text;
   }
 
   /* 桌上摆什么、它压弯到什么程度。单独拆出来是因为正在打字的时候不能重建便签列表，
@@ -639,6 +655,26 @@
     $('#dex-points').textContent = (C.points || 0) + ' 分';
     $('#dex-roll').textContent = '抽一只（' + E.GACHA.roll.cost + '）';
     $('#dex-roll').disabled = (C.points || 0) < E.GACHA.roll.cost;
+
+    if (window.WEATHER) {
+      $('#city-input').value = window.WEATHER.city();
+      $('#city-msg').textContent = window.WEATHER.city() ? '' : E.COPY.weather.askCity;
+    }
+  }
+
+  /* 填城市。查得到就立刻取一次天气，那一行马上出来——
+   * 不然填完什么反应都没有，看着像没生效。 */
+  function saveCity() {
+    if (!window.WEATHER) return;
+    var name = $('#city-input').value.trim();
+    var msg = $('#city-msg');
+    if (!name) { window.WEATHER.forget(); msg.textContent = E.COPY.weather.askCity; weatherNow(); return; }
+    msg.textContent = '…';
+    window.WEATHER.setCity(name).then(function (ok) {
+      msg.textContent = ok ? window.WEATHER.city() : E.COPY.weather.badCity;
+      if (ok) $('#city-input').value = window.WEATHER.city();
+      weatherNow();
+    });
   }
 
   /* ---------- 回看：按天 ---------- */
@@ -985,6 +1021,14 @@
   function bindChrome() {
     setInterval(function () { if (live) tick(); }, 10000);
     setInterval(function () { if (live) drawSprite(); }, 30000);
+    /* 天气：开一次要一次，之后每十分钟问一次「该更新了吗」。
+     * 真正隔多久去请求由 WEATHER 自己判断，这里问得勤一点没有代价。 */
+    if (window.WEATHER) {
+      setTimeout(function () { window.WEATHER.refresh().then(weatherNow); }, 1500);
+      setInterval(function () {
+        if (live) window.WEATHER.refresh().then(weatherNow);
+      }, 10 * 60000);
+    }
     // 场景逐帧：页面藏起来时不画，省电
     setInterval(function () {
       if (live && !document.hidden) window.SCENE.tick($('#props'));
@@ -1007,6 +1051,10 @@
     $('#save-import').addEventListener('click', function () { $('#save-file').click(); });
     $('#save-file').addEventListener('change', function (e) {
       if (e.target.files[0]) importSave(e.target.files[0]);
+    });
+    $('#city-save').addEventListener('click', saveCity);
+    $('#city-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); saveCity(); }
     });
     $('#dex-close').addEventListener('click', function () { $('#dex').hidden = true; });
     $('#dex').addEventListener('click', function (e) { if (e.target.id === 'dex') $('#dex').hidden = true; });

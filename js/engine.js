@@ -519,8 +519,11 @@
       if (s.hobbyId) {                       // 周末的爱好活动
         var h = hobby(s.hobbyId);
         if (!h) continue;
-          c.activeTaskId = null;
+        c.activeTaskId = null;
         log(c, ts, pick(h.lines), 'hobby');
+        // 是哪个爱好要留下来，否则 behaviorOf 只知道「在忙自己的事」，
+        // 12 个爱好会全都显示成同一个状态、配同一个道具
+        c.log[0].hobbyId = s.hobbyId;
         continue;
       }
       // LLM 排的那一天：只有一句话和一个行为码，没有任务实体
@@ -643,6 +646,15 @@
 
   var WEEKEND_BEHAVIOR = { wnight: 'W01', wmorning: 'W02', wafternoon: 'W04', wevening: 'W04', wlate: 'W04' };
 
+  /* 每个爱好显示成自己的状态。没有这张表的时候 12 个爱好全都是「在忙自己的事」配一本书，
+   * 不管它实际在打游戏还是在补觉。
+   * 做饭直接用工作日那个 A16，发呆用 W04——意思完全一样，没必要再开一个码。 */
+  var HOBBY2BEHAVIOR = {
+    H01: 'W06', H02: 'W07', H03: 'W08', H04: 'W09', H05: 'W10',
+    H06: 'W11', H07: 'A16', H08: 'W12', H09: 'W13', H10: 'W04',
+    H11: 'W14', H12: 'W15', H13: 'W16', H14: 'W17', H15: 'W18'
+  };
+
   /* 加班、失眠：跟周日恐惧（W05）同一套办法——按「今天/今晚 + 这只生物」算一个确定性种子，
    * 不查任务表也不用 Math.random。同一晚反复刷新永远是同一个结论，翻篇了才可能换。 */
   function overtimeTonight(c, ts) { return seeded(dateKey(ts) + ':' + c.prototypeId, 'overtime') < 0.32; }
@@ -654,12 +666,13 @@
       if (dayTypeOf(ts) === 'sunday' && new Date(ts).getHours() >= RULES.dayTypes.sunday.dread.fromHour) return 'W05';
       // 周末那两顿（12:30 / 19:00）本来一直被下面的时段兜底盖掉，从没显示出来过
       if (c.activeTaskId === 'T12') return mealBehavior(ts);
-      // 刚做完爱好活动的 90 分钟内算「在忙自己的事」。
+      // 刚做完爱好活动的 90 分钟内，显示这个爱好自己的状态。
       // 不能只看 log[0]——吃饭之类的日志会把爱好顶下去。
       for (var i = 0; i < c.log.length && i < 6; i++) {
         var L = c.log[i];
         if (ts - L.ts >= 90 * MS_PER_MIN) break;
-        if (L.kind === 'hobby') return 'W03';
+        // 老存档的爱好日志没记 hobbyId，回落到通用的「在忙自己的事」
+        if (L.kind === 'hobby') return HOBBY2BEHAVIOR[L.hobbyId] || 'W03';
       }
       return WEEKEND_BEHAVIOR[ph] || 'W04';
     }
@@ -722,6 +735,11 @@
   var awake = false;
   function setAwake(v) { awake = !!v; }
 
+  /* 外面什么天。跟 awake 一样从外面推进来——引擎不联网，也不认识 WMO 那套码，
+   * 它只认 rain / snow / thunder / fog 这几个词。拿不到天气就是空字符串。 */
+  var weatherKind = '';
+  function setWeather(k) { weatherKind = k || ''; }
+
   /* 今天轮到第几句。数已出过几句，按当天固定顺序往下走——一轮走完才重复。 */
   function riffTurn(c, ts, n) {
     var IMP = COPY.impulse, slot = IMP.slotMs;
@@ -772,10 +790,26 @@
     if (notes.length && seeded(seed, 'about') < IMP.noteChance)
       return at(IMP.aboutNote, 'line').split('{text}').join(at(notes, 'which').text);
 
+    /* 天气 × 在干嘛，比单看在干嘛还贴——下雨天的通勤和晴天的通勤不是一回事。
+     * 但同样不能每次都是：下雨天要是每句都在说雨，它就只剩一个话题了。 */
+    var byW = weatherPool(bid);
+    if (byW && seeded(seed, 'wx') < (IMP.weatherChance || 0)) return at(byW, 'pick');
+
     // 跟此刻在干嘛有关的更贴，但不能每次都是——不然它就只有一套反应了
     var byB = IMP.byBehavior[bid];
     var byQ = IMP.byQuirk[styleOf(c).quirk] || IMP.byQuirk.none;
     return at((byB && seeded(seed, 'src') < 0.6) ? byB : byQ, 'pick');
+  }
+
+  /* 这个天气下、这个状态有没有专属的话。没有专属就用这个天气的兜底池；
+   * 室内的那些状态（写东西、开会）两样都没有，外面下不下雨对它们没区别。 */
+  function weatherPool(bid) {
+    var w = COPY.impulse && COPY.impulse.byWeather;
+    if (!w || !weatherKind) return null;
+    var g = w[weatherKind];
+    if (!g) return null;
+    var p = g[bid] || g._any;
+    return (p && p.length) ? p : null;
   }
 
   /* 档位不再由隐藏数值决定，而是由「它手边有多少件」决定。
@@ -827,15 +861,17 @@
    * （删过一条「晚上+手边≥4件=加班档」：便签多不等于在加班。） */
   /* 一格之内不重抽。impulse 本来就按 13 分钟的格子走，静态池跟着同一个格子，
    * 整行就稳定了——否则 render 每 10 秒跑一次，pick() 每次都换一句。 */
-  var deskCache = { slot: -1, id: null, text: '' };
+  var deskCache = { slot: -1, id: null, wx: '', text: '' };
 
   function deskLine(c, ts) {
     ts = ts || Date.now();
     var slot = Math.floor(ts / (COPY.impulse.slotMs || 780000));
-    if (deskCache.slot === slot && deskCache.id === c.prototypeId) return deskCache.text;
+    // 天气并进缓存键：天气是开页面之后才到的，不带上它，这一格会一直卡在没天气的那句上
+    if (deskCache.slot === slot && deskCache.id === c.prototypeId && deskCache.wx === weatherKind)
+      return deskCache.text;
 
     var text = deskPick(c, ts);
-    deskCache = { slot: slot, id: c.prototypeId, text: text };
+    deskCache = { slot: slot, id: c.prototypeId, wx: weatherKind, text: text };
     return text;
   }
 
@@ -1222,7 +1258,7 @@
   global.Engine = {
     newCreature: newCreature, advanceTo: advanceTo, userAction: userAction,
     save: save, load: load, reset: reset,
-    riffsOf: riffsOf, setAwake: setAwake,
+    riffsOf: riffsOf, setAwake: setAwake, setWeather: setWeather,
     addNote: addNote, editNote: editNote, moveNote: moveNote,
     toggleNote: toggleNote, dropNote: dropNote, NOTE_MAX: NOTE_MAX,
     openNotes: openNotes, loadNotes: loadNotes, bubbleNotes: bubbleNotes,

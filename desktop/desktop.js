@@ -176,6 +176,7 @@
     if (foot) {
       if ($('.say')) foot.appendChild($('.say'));
       if ($('.behavior')) foot.appendChild($('.behavior'));
+      if ($('.weather')) foot.appendChild($('.weather'));   // 同理，天气那行也不能留在壁纸上
     }
 
     // 便签板钉住时右上角那个 ×（网页版不需要，所以不在 index.html 里）

@@ -243,6 +243,17 @@ button { font: inherit; cursor: pointer; }
   100% { opacity: .72; }
 }
 
+/* 外面什么天。比「即兴」还淡一档——它连补充都算不上，只是背景里的一个事实。
+   拿不到天气时整个 p 是 hidden，不留空行。 */
+.weather {
+  margin: 6px 0 0;
+  font-family: var(--px-font); font-size: 11px; -webkit-font-smoothing: none;
+  letter-spacing: 2px;
+  color: var(--ink-faint);
+  opacity: .75;
+  padding: 0 16px;
+}
+
 /* ---------- 便签区 ---------- */
 
 /* ---------- 桌面 ----------
@@ -659,6 +670,17 @@ button { font: inherit; cursor: pointer; }
   text-underline-offset: 3px; text-decoration-color: var(--lcd-line);
 }
 .dex-link:hover { color: var(--lcd-soft); }
+
+/* 填城市那一行。跟导出/导入并列，同属「这台机器上的设置」 */
+.dex-weather { align-items: center; }
+.city-input {
+  width: 90px; padding: 3px 6px;
+  background: none; border: 1px solid var(--lcd-line); border-radius: 3px;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  color: var(--lcd-soft);
+}
+.city-input:focus { outline: none; border-color: var(--lcd-dim); }
+.city-msg { font-family: var(--px-font); font-size: 11px; -webkit-font-smoothing: none; color: var(--lcd-dim); }
 
 .dex-who { margin: 4px 0 8px; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
 
