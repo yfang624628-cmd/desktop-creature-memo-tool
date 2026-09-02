@@ -7,49 +7,286 @@
     "fallback": "{prototypeName}{jobName}，例如『水豚产品经理』",
     "rarityNote": "命中 combo 的角色应在 UI 上有明显标记，并成为分享卡片的主文案。"
   },
-
   "combos": [
-    { "prototypeId": "R11", "jobId": "J18", "title": "拒绝对齐的对齐专家", "copy": "它的工作是让所有人达成共识，它本人不参与共识。", "rarity": "gold" },
-    { "prototypeId": "R18", "jobId": "J12", "title": "查无此人的进度负责人", "copy": "它每天催五个人的进度。没有人见过它。", "rarity": "gold" },
-    { "prototypeId": "R20", "jobId": "J15", "title": "自己会断，但要求别人别断", "copy": "它否掉了那版稿，理由是不够坚定。", "rarity": "gold" },
-    { "prototypeId": "R13", "jobId": "J18", "title": "越对齐越乱", "copy": "同步会开完了，大家对齐了三种不同的理解。", "rarity": "gold" },
-    { "prototypeId": "R09", "jobId": "J10", "title": "靠灵感搭框架", "copy": "它的框架每天都不一样，但每天都很有道理。", "rarity": "gold" },
-    { "prototypeId": "R06", "jobId": "J14", "title": "八条腿接住八种情绪", "copy": "它同时在安慰四个人，其中一个是它自己。", "rarity": "gold" },
-    { "prototypeId": "R17", "jobId": "J07", "title": "形态不定的需求方", "copy": "它今天的 PRD 和昨天的不是一个东西。", "rarity": "gold" },
-    { "prototypeId": "R07", "jobId": "J16", "title": "慢速驯兽", "copy": "需求变了三次，它还在驯第一只。", "rarity": "gold" },
-
-    { "prototypeId": "R14", "jobId": "J14", "title": "高频关怀", "copy": "它每十五分钟关心你一次。你开始有点紧张。", "rarity": "silver" },
-    { "prototypeId": "R19", "jobId": "J17", "title": "朴素炼金术", "copy": "它做的 deck 不好看，但每一页都说得通。", "rarity": "silver" },
-    { "prototypeId": "R15", "jobId": "J11", "title": "续命型顾问", "copy": "它的方法论第一条是先去接杯水。", "rarity": "silver" },
-    { "prototypeId": "R04", "jobId": "J04", "title": "不想沟通的沟通岗", "copy": "它接起电话前深吸了一口气。", "rarity": "silver" },
-    { "prototypeId": "R02", "jobId": "J08", "title": "急着做决策的人", "copy": "它已经排好了下季度，现在开始担心下下季度。", "rarity": "silver" },
-    { "prototypeId": "R10", "jobId": "J18", "title": "沉默的对齐", "copy": "它开了一整天的会，一句话没说，最后写了份最清楚的纪要。", "rarity": "silver" },
-    { "prototypeId": "R08", "jobId": "J09", "title": "什么都看见的观察者", "copy": "它记得那位用户在第七分钟停顿了一下。", "rarity": "silver" },
-    { "prototypeId": "R01", "jobId": "J16", "title": "钝感力驯兽", "copy": "需求第四次变更时，它还是那个表情。", "rarity": "silver" },
-    { "prototypeId": "R03", "jobId": "J01", "title": "看穿一切的实习生", "copy": "它整理着会议纪要，心里已经有了判断。", "rarity": "silver" },
-    { "prototypeId": "R16", "jobId": "J13", "title": "把琐碎钉在一起", "copy": "所有零散的表，现在都在一个文件夹里。", "rarity": "silver" },
-    { "prototypeId": "R05", "jobId": "J10", "title": "很会讲的分析师", "copy": "它的结论不一定对，但你会觉得很有道理。", "rarity": "silver" },
-    { "prototypeId": "R12", "jobId": "J12", "title": "不会崩的收口人", "copy": "项目延期了两周，它的语气没有变过。", "rarity": "silver" },
-    { "prototypeId": "R11", "jobId": "J04", "title": "有边界感的乙方", "copy": "它说了不行。会议室安静了四秒。", "rarity": "silver" },
-    { "prototypeId": "R18", "jobId": "J06", "title": "夜间出品", "copy": "凌晨两点，动效交付了。没有人知道它什么时候开始做的。", "rarity": "silver" },
-    { "prototypeId": "R20", "jobId": "J03", "title": "改到断掉", "copy": "第十一版和第一版一模一样，但它现在确定了。", "rarity": "silver" },
-    { "prototypeId": "R07", "jobId": "J17", "title": "一页一小时", "copy": "它的 deck 交得最晚，但没有人提出修改意见。", "rarity": "silver" },
-
-    { "prototypeId": "R09", "jobId": "J02", "title": "灵感型策划", "copy": "上午它有一个绝妙的想法。下午它想不起来了。", "rarity": "bronze" },
-    { "prototypeId": "R01", "jobId": "J15", "title": "很稳的否稿人", "copy": "它平静地说这版不行，然后平静地等下一版。", "rarity": "bronze" },
-    { "prototypeId": "R14", "jobId": "J12", "title": "推进狂", "copy": "它接管了所有流程，包括不属于它的那些。", "rarity": "bronze" },
-    { "prototypeId": "R06", "jobId": "J01", "title": "同时在八个群里", "copy": "它在八个群里被 @，回复了七个。", "rarity": "bronze" },
-    { "prototypeId": "R04", "jobId": "J05", "title": "审美洁癖", "copy": "它盯着那个 2px 的偏差看了很久。", "rarity": "bronze" },
-    { "prototypeId": "R19", "jobId": "J08", "title": "闷声推进", "copy": "它没有在任何会上发言，但事情都推完了。", "rarity": "bronze" },
-    { "prototypeId": "R15", "jobId": "J14", "title": "工位续命站", "copy": "它工位上的零食比 HR 系统更能留住人。", "rarity": "bronze" },
-    { "prototypeId": "R03", "jobId": "J11", "title": "结构化毒舌", "copy": "它用三层框架说明了这个想法不成立。", "rarity": "bronze" },
-    { "prototypeId": "R10", "jobId": "J09", "title": "安静地听完", "copy": "它没有打断任何一位受访者。", "rarity": "bronze" },
-    { "prototypeId": "R02", "jobId": "J13", "title": "高频小步快跑", "copy": "它今天发了十一条内容，现在有点缓不过来。", "rarity": "bronze" },
-    { "prototypeId": "R16", "jobId": "J16", "title": "把混乱装订成册", "copy": "混乱的需求被它拆成了十七个条目。", "rarity": "bronze" },
-    { "prototypeId": "R05", "jobId": "J18", "title": "对齐天赋", "copy": "它一个人说完了整场会。大家确实对齐了。", "rarity": "bronze" },
-    { "prototypeId": "R08", "jobId": "J15", "title": "看得太清楚", "copy": "它没有否稿，只是问了三个问题。", "rarity": "bronze" },
-    { "prototypeId": "R12", "jobId": "J14", "title": "自然恢复型关怀", "copy": "它没有给什么建议，但你聊完感觉好多了。", "rarity": "bronze" },
-    { "prototypeId": "R17", "jobId": "J17", "title": "混沌炼金", "copy": "它把一团混乱变成了二十四页，每页都很清楚。", "rarity": "bronze" },
-    { "prototypeId": "R13", "jobId": "J12", "title": "会迷路的催进度的人", "copy": "它去催进度，走错了会议室，顺便催了另一个项目。", "rarity": "bronze" }
+    {
+      "prototypeId": "R11",
+      "jobId": "J18",
+      "title": "拒绝对齐的对齐专家",
+      "copy": "它的工作是让所有人达成共识，它本人不参与共识。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R18",
+      "jobId": "J12",
+      "title": "查无此人的进度负责人",
+      "copy": "它每天催五个人的进度。没有人见过它。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R20",
+      "jobId": "J15",
+      "title": "自己会断，但要求别人别断",
+      "copy": "它否掉了那版稿，理由是不够坚定。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R13",
+      "jobId": "J18",
+      "title": "越对齐越乱",
+      "copy": "同步会开完了，大家对齐了三种不同的理解。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R09",
+      "jobId": "J10",
+      "title": "靠灵感搭框架",
+      "copy": "它的框架每天都不一样，但每天都很有道理。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R06",
+      "jobId": "J14",
+      "title": "一盒里插着八个人的情绪",
+      "copy": "它同时在安慰四个人，其中一个是它自己。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R17",
+      "jobId": "J07",
+      "title": "形态不定的需求方",
+      "copy": "它今天的 PRD 和昨天的不是一个东西。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R07",
+      "jobId": "J16",
+      "title": "慢速驯兽",
+      "copy": "需求变了三次，它还在驯第一只。",
+      "rarity": "gold"
+    },
+    {
+      "prototypeId": "R14",
+      "jobId": "J14",
+      "title": "高频关怀",
+      "copy": "它每十五分钟关心你一次。你开始有点紧张。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R19",
+      "jobId": "J17",
+      "title": "朴素炼金术",
+      "copy": "它做的 deck 不好看，但每一页都说得通。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R15",
+      "jobId": "J11",
+      "title": "续命型顾问",
+      "copy": "它的方法论第一条是先去接杯水。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R04",
+      "jobId": "J04",
+      "title": "不想沟通的沟通岗",
+      "copy": "它接起电话前深吸了一口气。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R02",
+      "jobId": "J08",
+      "title": "急着做决策的人",
+      "copy": "它已经排好了下季度，现在开始担心下下季度。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R10",
+      "jobId": "J18",
+      "title": "沉默的对齐",
+      "copy": "它开了一整天的会，一句话没说，最后写了份最清楚的纪要。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R08",
+      "jobId": "J09",
+      "title": "什么都看见的观察者",
+      "copy": "它记得那位用户在第七分钟停顿了一下。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R01",
+      "jobId": "J16",
+      "title": "钝感力驯兽",
+      "copy": "需求第四次变更时，它还是那个表情。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R03",
+      "jobId": "J01",
+      "title": "看穿一切的实习生",
+      "copy": "它整理着会议纪要，心里已经有了判断。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R16",
+      "jobId": "J13",
+      "title": "把琐碎钉在一起",
+      "copy": "所有零散的表，现在都在一个文件夹里。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R05",
+      "jobId": "J10",
+      "title": "很会讲的分析师",
+      "copy": "它的结论不一定对，但你会觉得很有道理。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R12",
+      "jobId": "J12",
+      "title": "不会崩的收口人",
+      "copy": "项目延期了两周，它的语气没有变过。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R11",
+      "jobId": "J04",
+      "title": "有边界感的乙方",
+      "copy": "它说了不行。会议室安静了四秒。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R18",
+      "jobId": "J06",
+      "title": "夜间出品",
+      "copy": "凌晨两点，动效交付了。没有人知道它什么时候开始做的。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R20",
+      "jobId": "J03",
+      "title": "改到断掉",
+      "copy": "第十一版和第一版一模一样，但它现在确定了。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R07",
+      "jobId": "J17",
+      "title": "一页一小时",
+      "copy": "它的 deck 交得最晚，但没有人提出修改意见。",
+      "rarity": "silver"
+    },
+    {
+      "prototypeId": "R09",
+      "jobId": "J02",
+      "title": "灵感型策划",
+      "copy": "上午它有一个绝妙的想法。下午它想不起来了。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R01",
+      "jobId": "J15",
+      "title": "很稳的否稿人",
+      "copy": "它平静地说这版不行，然后平静地等下一版。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R14",
+      "jobId": "J12",
+      "title": "推进狂",
+      "copy": "它接管了所有流程，包括不属于它的那些。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R06",
+      "jobId": "J01",
+      "title": "同时在八个群里",
+      "copy": "它在八个群里被 @，回复了七个。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R04",
+      "jobId": "J05",
+      "title": "审美洁癖",
+      "copy": "它盯着那个 2px 的偏差看了很久。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R19",
+      "jobId": "J08",
+      "title": "闷声推进",
+      "copy": "它没有在任何会上发言，但事情都推完了。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R15",
+      "jobId": "J14",
+      "title": "工位续命站",
+      "copy": "它工位上的零食比 HR 系统更能留住人。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R03",
+      "jobId": "J11",
+      "title": "结构化毒舌",
+      "copy": "它用三层框架说明了这个想法不成立。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R10",
+      "jobId": "J09",
+      "title": "安静地听完",
+      "copy": "它没有打断任何一位受访者。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R02",
+      "jobId": "J13",
+      "title": "高频小步快跑",
+      "copy": "它今天发了十一条内容，现在有点缓不过来。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R16",
+      "jobId": "J16",
+      "title": "把混乱装订成册",
+      "copy": "混乱的需求被它拆成了十七个条目。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R05",
+      "jobId": "J18",
+      "title": "对齐天赋",
+      "copy": "它一个人说完了整场会。大家确实对齐了。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R08",
+      "jobId": "J15",
+      "title": "看得太清楚",
+      "copy": "它没有否稿，只是问了三个问题。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R12",
+      "jobId": "J14",
+      "title": "自然恢复型关怀",
+      "copy": "它没有给什么建议，但你聊完感觉好多了。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R17",
+      "jobId": "J17",
+      "title": "混沌炼金",
+      "copy": "它把一团混乱变成了二十四页，每页都很清楚。",
+      "rarity": "bronze"
+    },
+    {
+      "prototypeId": "R13",
+      "jobId": "J12",
+      "title": "会迷路的催进度的人",
+      "copy": "它去催进度，走错了会议室，顺便催了另一个项目。",
+      "rarity": "bronze"
+    }
   ]
 }
