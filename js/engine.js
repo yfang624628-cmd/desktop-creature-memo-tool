@@ -695,7 +695,8 @@
       if (into < 90) return 'A18';    // 吃自己做的那顿
       return 'A10';
     }
-    if (ph === 'night') return insomniaTonight(c, ts) ? 'A15' : 'A10';
+    // 深夜要么在睡要么睡不着，都不是「下班恢复中」——凌晨三点它没在瘫着看电视
+    if (ph === 'night') return insomniaTonight(c, ts) ? 'A15' : 'A19';
     if (ph === 'lunch') return 'A08';
     return 'A01';
   }
@@ -847,7 +848,9 @@
       if (dayTypeOf(ts) === 'saturday' && Math.random() < 0.25) w = COPY.weekend.saturdayBonus;
       return pick(w || COPY.weekend.wafternoon);
     }
-    if (ph === 'night') return pick(COPY.nightPool.lines);
+    // 先问今晚睡没睡着，再决定说哪组。写死 nightPool 会让「失眠」底下配一句「它睡了」
+    if (ph === 'night')
+      return pick(insomniaTonight(c, ts) ? COPY.insomniaPool.lines : COPY.nightPool.lines);
     if (ph === 'evening') {
       var h = new Date(ts).getHours();
       var key = h < 21 ? '19-21' : (h < 23 ? '21-23' : '23-24');

@@ -688,6 +688,7 @@
     A14: drawOvertime,
     A15: drawInsomnia,
     A16: drawCooking,
+    A19: drawSleep,
     // 三顿饭共用一只碗：状态栏已经写明是哪顿，再画三种相似的食物只会更难分
     A17: drawBowl,
     A18: drawBowl,
@@ -717,7 +718,7 @@
 
   // 真的睡着的状态——跟这两个共用 drawSleep 的 Z 是同一个判断标准。
   // 失眠（A15）不算：它就是没睡着，眼睛不该被强制闭上
-  var SLEEP = { A09: 1, W01: 1 };
+  var SLEEP = { A09: 1, A19: 1, W01: 1 };
 
   // chatter 会在这两个状态里切去敲电脑。A05 本来画的就是电脑，再换一台小的只会看着像闪
   var CHATTER_SWAP = { A03: 1, A04: 1 };
