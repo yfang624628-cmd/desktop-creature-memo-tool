@@ -34,7 +34,7 @@
   var blinkUntil = 0;
 
   /* 可动部件。生物本体的轮廓一格不改，动的是 sprites 里 idle / take 标出的那几个格子——
-   * 马克杯的热气、（将来）猫的尾巴、章鱼的触手。不画新帧，只开关像素。 */
+   * 马克杯的热气、猫的尾巴、薯条往外冒的那几根。不画新帧，只开关像素。 */
   var partAt = 0;          // 待机动作当前帧
   var partBurst = null;    // { frames, stepMs, at } —— 接便签这类一次性动作
 
@@ -244,6 +244,7 @@
 
     refreshLoad();
     renderNotes();
+    clipBadge();
   }
 
   /* 外面什么天。没填城市、或者拿不到，整行不显示——不留一行空的占着位置。
@@ -425,6 +426,168 @@
     t.className = 'toast on';
     clearTimeout(toast._t);
     toast._t = setTimeout(function () { t.className = 'toast'; }, 2600);
+  }
+
+  /* ---------- 剪贴板 ----------
+   *
+   * 便签是放下，剪贴板是取回——方向相反，所以这里最大的那块点击区给「复制」。
+   * 它对这里的东西没有任何反应：不给分、不算负载、不出声。
+   */
+
+  var clipOpen = {};        // 哪几条展开了全文。只活在这一次会话里，不进存档
+
+  function clipWhen(ts, now) {
+    var a = new Date(ts), b = new Date(now);
+    var d = Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate())
+                      - new Date(a.getFullYear(), a.getMonth(), a.getDate())) / 86400000);
+    if (d <= 0) return '今天';
+    if (d === 1) return '昨天';
+    return d + ' 天前';
+  }
+
+  function clipBadge() {
+    var n = (C.clips || []).length;
+    var b = $('#clip-badge');
+    b.textContent = n;
+    b.hidden = !n;
+  }
+
+  /* 剪贴板里拿一段过来。图片、文件那些拿到的是空字符串——挡下来并说清为什么，
+   * 静默失败会让你以为是没点中。 */
+  function clipTake() {
+    var D = window.DESKTOP;
+    if (!D || !D.readClipboard) { toast('这一条只有桌面版有'); return; }
+    D.readClipboard().then(function (r) {
+      if (!r || !r.text) { toast(r && r.hasData ? '只收文字。这个收不了。' : '剪贴板是空的'); return; }
+      var res = E.addClip(C, r.text, Date.now());
+      if (!res) { toast('剪贴板是空的'); return; }
+      E.save(C);
+      clipBadge();
+      if (!$('#clip').hidden) clipRender();
+      if (res.dup) { toast('已经收着了'); return; }
+      // 接住的动作。纸堆和泡泡都不动——那是负载，剪贴板不算负载
+      react('take'); burst('take');
+      toast(res.cut ? '收下了 · 太长，留了前 ' + E.CLIP_MAX + ' 字' : '收下了');
+    }, function () { toast('剪贴板读不出来'); });
+  }
+
+  var clipUndo = null;      // { clip, idx, timer }
+
+  function clipDrop(id) {
+    var list = C.clips || [];
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) { idx = i; break; }
+    if (idx < 0) return;
+    if (clipUndo) clearTimeout(clipUndo.timer);      // 连删两条：前一条就此定案
+    clipUndo = { clip: list[idx], idx: idx, timer: null };
+    E.dropClip(C, id);
+    E.save(C);
+    clipUndo.timer = setTimeout(function () { clipUndo = null; clipRender(); }, 6000);
+    clipBadge();
+    clipRender();
+  }
+
+  function clipUndoDrop() {
+    if (!clipUndo) return;
+    var u = clipUndo;
+    clearTimeout(u.timer);
+    clipUndo = null;
+    C.clips.splice(Math.min(u.idx, C.clips.length), 0, u.clip);
+    E.save(C);
+    clipBadge();
+    clipRender();
+  }
+
+  function clipRender() {
+    var now = Date.now();
+    var host = $('#clip-list');
+    var list = C.clips || [];
+    var a = document.activeElement;
+    if (a && a.classList && a.classList.contains('clip-edit') && host.contains(a)) return;
+
+    host.innerHTML = '';
+    $('#clip-count').textContent = list.length ? list.length + ' 条' : '';
+    $('#clip-empty').hidden = list.length > 0 || !!clipUndo;
+
+    list.forEach(function (p) {
+      var li = el('li', 'clip-item');
+      // 三行以上才折。行数按 12px / 1.6 行高的实际可容字数估，跟 CSS 的 line-clamp 对齐
+      var long = p.text.indexOf('\n') >= 0 || p.text.length > 46;
+      var open = !!clipOpen[p.id];
+
+      var t = el('div', 'clip-text' + (long && !open ? ' fold' : ''), p.text);
+      li.appendChild(t);
+
+      var line = el('div', 'clip-line');
+      var left = el('span', 'clip-line-left');
+      if (long) {
+        var more = el('button', 'clip-more', open ? '收起' : '全文');
+        more.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (open) delete clipOpen[p.id]; else clipOpen[p.id] = 1;
+          clipRender();
+        });
+        left.appendChild(more);
+      }
+      if (p.cut) {
+        var cut = el('span', 'clip-cut', '已截断');
+        cut.title = '太长，只留了前 ' + E.CLIP_MAX + ' 字';
+        left.appendChild(cut);
+      }
+      line.appendChild(left);
+      line.appendChild(el('span', 'clip-when', clipWhen(p.at, now)));
+      li.appendChild(line);
+
+      var x = el('button', 'clip-x');
+      x.innerHTML = ICON_CROSS;
+      x.setAttribute('aria-label', '拿走');
+      x.addEventListener('click', function (e) { e.stopPropagation(); clipDrop(p.id); });
+      li.appendChild(x);
+
+      // 整条 = 复制。取回是这块屏存在的唯一理由，给它最大的点击区
+      li.addEventListener('click', function () { clipCopy(p); });
+      li.addEventListener('dblclick', function (e) { e.stopPropagation(); clipEdit(li, t, p); });
+
+      host.appendChild(li);
+    });
+
+    if (clipUndo) {
+      var u = el('li', 'note-undo');
+      u.appendChild(el('span', 'note-undo-text', '拿走了。'));
+      var back = el('button', 'note-undo-btn', '撤回来');
+      back.addEventListener('click', clipUndoDrop);
+      u.appendChild(back);
+      var at = host.children[clipUndo.idx];
+      if (at) host.insertBefore(u, at); else host.appendChild(u);
+    }
+  }
+
+  function clipCopy(p) {
+    var D = window.DESKTOP;
+    if (D && D.writeClipboard) { D.writeClipboard(p.text); toast('已复制'); return; }
+    // 浏览器里退回标准接口。不可用时不假装成功
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(p.text).then(function () { toast('已复制'); },
+                                                 function () { toast('复制失败'); });
+    } else { toast('复制失败'); }
+  }
+
+  function clipEdit(li, textNode, p) {
+    var ta = el('textarea', 'clip-edit');
+    ta.value = p.text;
+    ta.maxLength = E.CLIP_MAX;
+    ta.rows = 1;
+    li.replaceChild(ta, textNode);
+    autosize(ta);
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+    ta.addEventListener('input', function () { autosize(ta); });
+    ta.addEventListener('click', function (e) { e.stopPropagation(); });   // 编辑时别触发复制
+    ta.addEventListener('blur', function () {
+      E.editClip(C, p.id, ta.value);
+      E.save(C);
+      clipRender();
+    });
   }
 
   /* ---------- 便签交互 ---------- */
@@ -1058,6 +1221,10 @@
     });
     $('#dex-close').addEventListener('click', function () { $('#dex').hidden = true; });
     $('#dex').addEventListener('click', function (e) { if (e.target.id === 'dex') $('#dex').hidden = true; });
+    $('#clip-take').addEventListener('click', clipTake);
+    $('#open-clip').addEventListener('click', function () { clipRender(); $('#clip').hidden = false; });
+    $('#clip-close').addEventListener('click', function () { $('#clip').hidden = true; });
+    $('#clip').addEventListener('click', function (e) { if (e.target.id === 'clip') $('#clip').hidden = true; });
     $('#open-arch').addEventListener('click', function () { archSwitchTab('day'); $('#arch').hidden = false; });
     $('#arch-close').addEventListener('click', function () { $('#arch').hidden = true; });
     $('#arch').addEventListener('click', function (e) { if (e.target.id === 'arch') $('#arch').hidden = true; });

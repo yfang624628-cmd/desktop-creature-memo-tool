@@ -31,6 +31,12 @@ contextBridge.exposeInMainWorld('DESKTOP', {
   llmReady: function () { return ipcRenderer.invoke('pet:llm-ready'); },
   llmGenerate: function (payload) { return ipcRenderer.invoke('pet:llm-generate', payload); },
 
+  /* 剪贴板。渲染进程里的 navigator.clipboard 要焦点、要权限，而这个窗口是置顶穿透的，
+   * 十有八九读不到——所以走主进程的 clipboard 模块，无焦点无权限。
+   * 只读纯文字那一份：图片和文件复制过来 text 是空的，UI 据此挡下来。 */
+  readClipboard: function () { return ipcRenderer.invoke('pet:clip-read'); },
+  writeClipboard: function (text) { ipcRenderer.send('pet:clip-write', text); },
+
   focus: function () { ipcRenderer.send('pet:focus'); },
   menu: function () { ipcRenderer.send('pet:menu'); },
   onMenu: function (fn) {

@@ -55,9 +55,21 @@
   <section class="desk">
     <div class="desk-head">
       <span id="load" class="load">手边空着。</span>
-      <span class="new-notes">
-        <button id="new-yellow" class="new-note new-yellow" aria-label="新建深绿便签" title="新建深绿便签"></button>
-        <button id="new-pink" class="new-note new-pink" aria-label="新建浅绿便签" title="新建浅绿便签"></button>
+      <span class="head-tools">
+        <!-- 空心轮廓，不是第三个方块：方块的含义是「纸」，这个是装东西的地方 -->
+        <button id="clip-take" class="clip-take" aria-label="收下剪贴板里的东西" title="收下剪贴板里的东西">
+          <svg width="16" height="20" viewBox="0 0 8 10" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="0" y="0" width="6" height="1"/><rect x="0" y="1" width="1" height="8"/>
+            <rect x="6" y="1" width="1" height="1"/><rect x="7" y="2" width="1" height="7"/>
+            <rect x="0" y="9" width="8" height="1"/>
+            <rect x="2" y="4" width="4" height="1"/><rect x="2" y="6" width="4" height="1"/>
+          </svg>
+          <span id="clip-badge" class="clip-badge" hidden></span>
+        </button>
+        <span class="new-notes">
+          <button id="new-yellow" class="new-note new-yellow" aria-label="新建深绿便签" title="新建深绿便签"></button>
+          <button id="new-pink" class="new-note new-pink" aria-label="新建浅绿便签" title="新建浅绿便签"></button>
+        </span>
       </span>
     </div>
 
@@ -65,7 +77,10 @@
     <p id="notes-empty" class="notes-empty">写点什么交给它拿着。</p>
 
     <div class="desk-foot">
-      <button id="open-arch" class="desk-link">回看</button>
+      <span class="desk-jumps">
+        <button id="open-arch" class="desk-link">回看</button>
+        <button id="open-clip" class="desk-link">剪贴板</button>
+      </span>
     </div>
   </section>
 
@@ -114,6 +129,21 @@
         <span id="city-msg" class="city-msg"></span>
       </footer>
       <button id="dex-close" class="dex-close" aria-label="关闭"><svg width="10" height="10" viewBox="0 0 5 5" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/></svg></button>
+    </div>
+  </div>
+
+  <!-- 剪贴板：跟便签方向相反——那边是放下，这边是取回。它对这里的东西没有任何反应。 -->
+  <div id="clip" class="clip" hidden>
+    <div class="clip-panel">
+      <header class="clip-head">
+        <h2>剪贴板</h2>
+        <span id="clip-count" class="clip-count"></span>
+      </header>
+      <!-- 空态在列表之前：桌面上这块屏是固定高度的，列表占满剩余空间，
+           放在后面这句话会被顶到屏底去 -->
+      <p id="clip-empty" class="clip-empty">复制点什么，再点板子右上角那个钮。</p>
+      <ul id="clip-list" class="clip-list"></ul>
+      <button id="clip-close" class="clip-close" aria-label="关闭"><svg width="10" height="10" viewBox="0 0 5 5" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/></svg></button>
     </div>
   </div>
 

@@ -141,6 +141,7 @@
 
   var MENU = {
     arch:   '#open-arch',
+    clip:   '#open-clip',
     dex:    '#open-dex',
     export: '#save-export',
     import: '#save-import'
@@ -216,6 +217,7 @@
     watchHidden('#app', apply);
     watchHidden('#dex', syncOverlay);
     watchHidden('#arch', syncOverlay);
+    watchHidden('#clip', syncOverlay);
 
     apply();
   }
@@ -224,7 +226,7 @@
    * 从右键菜单进来的，看完就只剩它自己站着；从板子上进去的，看完板子还在。
    * 以前是不管从哪进来都强行钉住板子，于是右键看完图鉴，桌上凭空多一块板。 */
   function syncOverlay() {
-    var now = !$('#dex').hidden || !$('#arch').hidden;
+    var now = !$('#dex').hidden || !$('#arch').hidden || !$('#clip').hidden;
     if (now !== overlaid) {
       if (now) before = { pinned: pinned, showing: showing };
       else if (before) { pinned = before.pinned; showing = before.showing; before = null; }

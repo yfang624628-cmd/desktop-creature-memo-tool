@@ -8,7 +8,7 @@
  * 浏览器里直接打开照样跑（desktop.js 检测不到这个壳就整个不干活）。
  */
 
-const { app, BrowserWindow, Menu, ipcMain, screen, globalShortcut, shell, powerMonitor } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, screen, globalShortcut, shell, powerMonitor, clipboard } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const llm = require('./llm');
@@ -194,13 +194,28 @@ ipcMain.on('pet:focus', function () {
   if (win) win.focus();
 });
 
+/* 只取纯文字那一份。系统在复制那一刻就同时备好了带格式和不带格式两份，
+ * 这里读不带格式的那份就是「转成纯文字」，不需要任何转换代码。
+ * hasData 用来分「剪贴板是空的」和「里面是图片/文件」——两句话不一样。 */
+ipcMain.handle('pet:clip-read', function () {
+  try {
+    return { text: clipboard.readText() || '', hasData: clipboard.availableFormats().length > 0 };
+  } catch (e) { return { text: '', hasData: false }; }
+});
+
+ipcMain.on('pet:clip-write', function (e, text) {
+  try { if (typeof text === 'string' && text) clipboard.writeText(text); } catch (err) {}
+});
+
 ipcMain.on('pet:menu', function () {
   if (!win) return;
   const send = function (action) { win.webContents.send('pet:menu-action', action); };
   Menu.buildFromTemplate([
+    // 上面一组是你的东西，下面一组是调这只生物
     { label: '回看', click: function () { send('arch'); } },
-    { label: '图鉴',     click: function () { send('dex'); } },
+    { label: '剪贴板', click: function () { send('clip'); } },
     { type: 'separator' },
+    { label: '图鉴', click: function () { send('dex'); } },
     {
       label: 'AI 文案设置…',
       click: function () {

@@ -210,12 +210,13 @@ button { font: inherit; cursor: pointer; }
 }
 
 .say {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
   letter-spacing: 2px;
   line-height: 1.75;
-  padding: 0 18px;
-  min-height: 26px;
+  padding: 0 12px;
+  /* 刚好装下一行。留高了状态换字时下面几行会跟着跳，留矮了又会跳——状态永远只有一行 */
+  min-height: 21px;
 }
 .say.turn { animation: say-turn .5s ease-out; }
 @keyframes say-turn {
@@ -223,11 +224,12 @@ button { font: inherit; cursor: pointer; }
   100% { opacity: 1; transform: none; }
 }
 .behavior {
-  margin: 8px 0 0;
+  margin: 5px 0 0;
   font-size: 11px;
   letter-spacing: 2px;
+  line-height: 1.5;
   color: var(--ink-faint);
-  padding: 0 16px;
+  padding: 0 10px;
 }
 /* 它正在做你交给它的那件事 */
 .behavior.on-note { color: var(--ink-soft); }
@@ -246,12 +248,12 @@ button { font: inherit; cursor: pointer; }
 /* 外面什么天。比「即兴」还淡一档——它连补充都算不上，只是背景里的一个事实。
    拿不到天气时整个 p 是 hidden，不留空行。 */
 .weather {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-family: var(--px-font); font-size: 11px; -webkit-font-smoothing: none;
   letter-spacing: 2px;
   color: var(--ink-faint);
   opacity: .75;
-  padding: 0 16px;
+  padding: 0 10px;
 }
 
 /* ---------- 便签区 ---------- */
@@ -277,6 +279,29 @@ button { font: inherit; cursor: pointer; }
 /* 占满剩下的宽度，把右边那组（两个新建钮 + 叉）顶到最右边去 */
 .load { flex: 1; min-width: 0; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); }
 
+.head-tools { display: flex; align-items: center; gap: 9px; flex: none; }
+
+/* 收下剪贴板。空心轮廓，跟旁边两个实心方块靠「描出来 / 填满」区分：
+   方块是纸，你往上写字；这个是装东西的地方，你不往里写。
+   读系统剪贴板要走主进程，网页版做不到，所以默认不显示——桌面壳那边再打开。
+   剪贴板这块屏本身网页版仍然能看能复制，只是没法往里收东西。 */
+.clip-take {
+  display: none;
+  position: relative; flex: none;
+  background: none; border: none; padding: 0;
+  line-height: 0; color: var(--lcd-soft); cursor: pointer;
+  transition: transform .12s ease;
+}
+.clip-take:hover { color: var(--lcd-ink); transform: scale(1.12); }
+.clip-take:active { transform: scale(.92); }
+.clip-badge {
+  position: absolute; top: -5px; right: -6px;
+  min-width: 12px; height: 12px; padding: 0 2px;
+  background: var(--lcd-ink); color: var(--lcd-bg);
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
+  line-height: 12px; text-align: center; font-variant-numeric: tabular-nums;
+}
+
 /* 两个方块就是新建。钮本身是那张纸的颜色——不用写字解释它是什么。
    圆角在一块像素屏上说不通，整格的方块才是这里的语言。 */
 .new-notes { display: flex; gap: 6px; flex: none; }
@@ -296,6 +321,30 @@ button { font: inherit; cursor: pointer; }
   max-height: 52vh;
   overflow-y: auto;
 }
+
+/* 屏里所有能滚的地方共用一条细杠。系统默认那条有十几像素宽，
+   在一块 228px 的板子上等于吃掉纸的一角。不做圆角——这块屏上只有整格的方块。 */
+.notes::-webkit-scrollbar,
+.clip-list::-webkit-scrollbar,
+.clip-panel::-webkit-scrollbar,
+.arch-panel::-webkit-scrollbar,
+.arch-view-day::-webkit-scrollbar,
+.dex-panel::-webkit-scrollbar,
+.dex-grid::-webkit-scrollbar { width: 4px; }
+.notes::-webkit-scrollbar-track,
+.clip-list::-webkit-scrollbar-track,
+.clip-panel::-webkit-scrollbar-track,
+.arch-panel::-webkit-scrollbar-track,
+.arch-view-day::-webkit-scrollbar-track,
+.dex-panel::-webkit-scrollbar-track,
+.dex-grid::-webkit-scrollbar-track { background: transparent; }
+.notes::-webkit-scrollbar-thumb,
+.clip-list::-webkit-scrollbar-thumb,
+.clip-panel::-webkit-scrollbar-thumb,
+.arch-panel::-webkit-scrollbar-thumb,
+.arch-view-day::-webkit-scrollbar-thumb,
+.dex-panel::-webkit-scrollbar-thumb,
+.dex-grid::-webkit-scrollbar-thumb { background: var(--lcd-dim); }
 .notes-empty {
   margin: 14px 0 4px;
   font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none;
@@ -686,14 +735,94 @@ button { font: inherit; cursor: pointer; }
 
 /* ---------- 回看 ---------- */
 
-.desk-foot { margin-top: 10px; text-align: center; }
+.desk-foot { margin-top: 7px; text-align: center; }
+/* 三块屏是并排的关系，入口就并排放。
+   两个词之间要留得开：挨太近时两条下划线会连成一根横杠，读起来是一块东西不是两个入口。 */
+.desk-jumps { display: flex; justify-content: center; gap: 22px; margin-bottom: 4px; }
 .desk-link {
-  background: none; border: none; padding: 4px 6px;
-  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 2px;
+  background: none; border: none; padding: 2px 0;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 1px;
   color: var(--lcd-dim); cursor: pointer;
-  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--lcd-line);
+  /* 下划线只在鼠标碰到时出现。常驻的话这一行比它自己说的那句话还重 */
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: transparent;
+  transition: color .12s ease, text-decoration-color .12s ease;
 }
-.desk-link:hover { color: var(--lcd-soft); }
+.desk-link:hover { color: var(--lcd-soft); text-decoration-color: var(--lcd-line); }
+
+/* ---------- 剪贴板 ----------
+   跟回看、图鉴同一块屏、同一套外框。区别只在这里的东西是给你取回的，
+   所以整条就是复制的点击区，右上角那个叉跟便签的 .note-x 是同一套。 */
+
+.clip {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(53, 54, 47, .34);
+}
+.clip-panel {
+  position: relative;
+  width: var(--win); max-width: 100%; max-height: 82vh;
+  overflow-y: auto;
+  background: var(--lcd-bg);
+  border: 3px solid var(--bezel);
+  border-radius: 6px;
+  padding: 12px 12px 14px;
+}
+.clip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding-right: 22px; }
+.clip-head h2 { margin: 0; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; letter-spacing: 4px; font-weight: 400; color: var(--lcd-ink); }
+.clip-count { font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft); font-variant-numeric: tabular-nums; }
+.clip-empty { margin: 24px 0 4px; text-align: center; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-dim); line-height: 1.9; }
+.clip-close {
+  position: absolute; top: 11px; right: 11px;
+  background: none; border: none; padding: 2px;
+  line-height: 0; color: var(--lcd-dim); cursor: pointer;
+}
+.clip-close:hover { color: var(--lcd-ink); }
+
+.clip-list { list-style: none; margin: 11px 0 0; padding: 0; }
+.clip-item {
+  position: relative;
+  margin-bottom: 7px; padding: 8px 9px;
+  background: rgba(255, 255, 255, .28);
+  border: 1px solid var(--lcd-line);
+  cursor: pointer;
+}
+.clip-item:last-child { margin-bottom: 0; }
+.clip-item:hover { border-color: var(--lcd-soft); }
+/* 你自己存的字，留苹方——跟便签上的正文同一个理由 */
+.clip-text { font-size: 12px; line-height: 1.6; color: var(--lcd-ink); white-space: pre-wrap; word-break: break-word; }
+.clip-text.fold { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* 编辑态。用 textarea 而不是 contenteditable：跟便签同一套，autosize 也能直接复用 */
+.clip-edit {
+  display: block; width: 100%;
+  background: rgba(255, 255, 255, .5);
+  border: none; outline: 1px solid var(--lcd-ink);
+  padding: 0; margin: 0;
+  font: inherit; font-size: 12px; line-height: 1.6; color: var(--lcd-ink);
+  resize: none; overflow: hidden;
+}
+
+/* 「全文」和时间同一行：板子只有这么宽，不给它们各占一行 */
+.clip-line { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 3px; }
+.clip-line-left { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.clip-more {
+  flex: none; background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-soft);
+}
+.clip-more:hover { color: var(--lcd-ink); }
+.clip-cut {
+  font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.clip-when { flex: none; font-family: var(--px-font); font-size: 12px; -webkit-font-smoothing: none; color: var(--lcd-dim); }
+.clip-x {
+  position: absolute; right: 5px; top: 5px;
+  background: none; border: none; padding: 2px;
+  color: transparent; line-height: 0; cursor: pointer;
+}
+.clip-item:hover .clip-x { color: var(--lcd-dim); }
+.clip-x:hover { color: var(--lcd-ink); }
 
 .arch {
   position: fixed; inset: 0; z-index: 20;

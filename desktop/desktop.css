@@ -39,8 +39,8 @@ body.desktop .pet {
   align-items: center;
   margin: 0;
 }
-body.desktop .open-dex,
-body.desktop #open-arch { display: none; }   /* 图鉴和按天回看搬进右键菜单了 */
+body.desktop .open-dex { display: none; }   /* 图鉴走右键菜单，跟 AI 文案设置一组 */
+body.desktop .clip-take { display: block; } /* 读系统剪贴板只有桌面版做得到 */
 
 /* 它站在窗口底边，而描边比身体多出一格——不留出这一格，脚底会被窗口切掉 */
 body.desktop .pet-stage { padding-bottom: 16px; }
@@ -191,14 +191,16 @@ body.desktop[data-mode="panel"] .desk {
    桌面上不存在「背景」这个东西，蒙版直接去掉，卡片自己是实心的就够了。 */
 /* 底部留出 --pet-h，面板底边就跟便签板底边落在同一条线上，它始终在屏下面露着脸 */
 body.desktop .dex,
-body.desktop .arch {
+body.desktop .arch,
+body.desktop .clip {
   pointer-events: auto;
   background: none;
   align-items: flex-end;
   padding: 14px 16px var(--pet-h);
 }
 body.desktop .dex-panel,
-body.desktop .arch-panel {
+body.desktop .arch-panel,
+body.desktop .clip-panel {
   height: var(--screen-h);
   max-height: none;
   overflow: hidden;                /* 滚动交给里面那一层，屏本身不滚 */
@@ -209,9 +211,11 @@ body.desktop .arch-panel {
 body.desktop .arch-head,
 body.desktop .arch-tabs,
 body.desktop .dex-head,
-body.desktop .dex-foot { flex: none; }
+body.desktop .dex-foot,
+body.desktop .clip-head { flex: none; }
 body.desktop .arch-view-day,
-body.desktop .dex-grid { flex: 1; min-height: 0; overflow-y: auto; }
+body.desktop .dex-grid,
+body.desktop .clip-list { flex: 1; min-height: 0; overflow-y: auto; }
 
 /* 日历排完还剩一截，「回到今天」落到屏底，不悬在半空 */
 body.desktop .arch-view-month { flex: 1; min-height: 0; display: flex; flex-direction: column; }

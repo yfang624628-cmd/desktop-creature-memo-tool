@@ -276,6 +276,7 @@
       hobbies: (assessment && assessment.hobbies) || [],
       notes: [], noteSeq: 0, noteRecallAt: 0,
       done: [], doneSeq: 0,               // 完成快照。回看的唯一来源，见 archive()
+      clips: [], clipSeq: 0,              // 剪贴板。跟便签互不相通，见 addClip()
       points: 0, pointsDay: null, pointsToday: 0, owned: [proto.id]
     };
 
@@ -1075,6 +1076,68 @@
     c.notes = c.notes.filter(function (x) { return x.id !== id; });
   }
 
+  /* ---------- 剪贴板 ----------
+   *
+   * 跟便签方向相反：便签是你把事放下交给它拿着，剪贴板是你把东西存着等会儿取回来。
+   * 因此它一条都不碰——不给分、不算负载、不进回看、不进任何提示词、它一句话都不说。
+   * 这里只有存和取，没有「完成」这个概念。
+   */
+
+  var CLIP_MAX = 2000;
+
+  /* 「转成纯文字」不在这里做：系统在复制那一刻就备好了纯文字那一份，桌面壳只读那份。
+   * 这里只做收尾——剪首尾空白、连续空行压成一个、清掉零宽字符。
+   * 换行本身必须留着：一份 JD 的结构全靠换行。 */
+  function tidyClip(s) {
+    return String(s == null ? '' : s)
+      .replace(/[​-‍﻿­]/g, '')
+      .replace(/[ \t]+$/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\s+|\s+$/g, '');
+  }
+
+  /* 收下一段文字。返回 { clip, dup, cut }——三个结果对应三句不同的话，由 UI 去说。
+   * 同一段再收一次不新增，把原来那条挪到最上面：零摩擦意味着你会手滑连点。 */
+  function addClip(c, text, now) {
+    if (!c.clips) { c.clips = []; c.clipSeq = c.clipSeq || 0; }
+    now = now || Date.now();
+    var t = tidyClip(text);
+    if (!t) return null;
+
+    for (var i = 0; i < c.clips.length; i++) {
+      if (c.clips[i].text === t) {
+        var had = c.clips.splice(i, 1)[0];
+        had.at = now;
+        c.clips.unshift(had);
+        return { clip: had, dup: true, cut: false };
+      }
+    }
+
+    var cut = t.length > CLIP_MAX;
+    if (cut) t = t.slice(0, CLIP_MAX);
+    var clip = { id: 'C' + (++c.clipSeq), text: t, at: now, cut: cut };
+    c.clips.unshift(clip);
+    return { clip: clip, dup: false, cut: cut };
+  }
+
+  function editClip(c, id, text) {
+    var list = c.clips || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id !== id) continue;
+      var t = tidyClip(text);
+      if (t.length > CLIP_MAX) t = t.slice(0, CLIP_MAX);
+      list[i].text = t;
+      list[i].cut = false;              // 改过之后就是你自己写的了，不再标「已截断」
+      return list[i];
+    }
+    return null;
+  }
+
+  function dropClip(c, id) {
+    if (!c.clips) return;
+    c.clips = c.clips.filter(function (x) { return x.id !== id; });
+  }
+
   /* ---------- 按天回看 ----------
    * 按「划掉的那天」归档，读 c.done 的快照而不是便签本体——便签可以随时改，
    * 直接引用的话三天前的记录会跟着变。
@@ -1232,6 +1295,7 @@
       if (!c || c.version !== 1 || !c.prototypeId) return null;
       // 便签系统上线前的存档没有这几个字段
       if (!c.notes) { c.notes = []; c.noteSeq = 0; c.noteRecallAt = 0; }
+      if (!c.clips) { c.clips = []; c.clipSeq = 0; }
       migrateNotes(c);
       if (c.points == null) { c.points = 0; c.pointsToday = 0; c.pointsDay = null; }
       if (!c.owned || !c.owned.length) c.owned = [c.prototypeId];
@@ -1264,6 +1328,7 @@
     riffsOf: riffsOf, setAwake: setAwake, setWeather: setWeather,
     addNote: addNote, editNote: editNote, moveNote: moveNote,
     toggleNote: toggleNote, dropNote: dropNote, NOTE_MAX: NOTE_MAX,
+    addClip: addClip, editClip: editClip, dropClip: dropClip, CLIP_MAX: CLIP_MAX,
     openNotes: openNotes, loadNotes: loadNotes, bubbleNotes: bubbleNotes,
     loadText: loadText, styleOf: styleOf,
     archive: archive, archMonth: archMonth, dateKey: dateKey,

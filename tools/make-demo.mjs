@@ -41,6 +41,7 @@ const DESK = block('<section class="desk">');
 const PET  = block('<section class="pet">');
 const ARCH = block('<div class="arch-panel">');
 const DEX  = block('<div class="dex-panel">');
+const CLIP = block('<div class="clip-panel">');
 
 /* ---------- 精灵：跟 ui.js 的 paintSprite 同一个算法 ---------- */
 function sprite(id, mode) {
@@ -70,6 +71,14 @@ const DAYS = [
   { t: '8 月 20 日 周四', items: [['yellow', '订下周三的会议室']] },
   { t: '8 月 19 日 周三', items: [['yellow', '跟进入库字段'], ['yellow', '查重方案再看一遍'], ['pink', '想一下日报能不能自动生成']] }
 ];
+/* 剪贴板：一条地址、一条链接、一条要折起来的长文——三种显示形态各一个 */
+const CLIPS = [
+  { t: '望京 SOHO T2 座 B 区 14 层，前台说找市场部', w: '今天' },
+  { t: 'https://example.com/2026/campus/list?from=job&id=18', w: '今天' },
+  { t: '会议纪要要点：\n1、导出字段先按后台命名对齐，别在前端再翻译一遍\n2、筛选条件进需求池，这版不做\n3、下周三之前给一版查重方案', w: '昨天', fold: true },
+  { t: '顺丰单号 SF1234567890123', w: '3 天前' },
+  { t: '「验证可能是目前人们做得最不到位、但又最重要的一件事情。」', w: '6 天前' }
+];
 const MONTH = { y: 2026, m: 8, today: 25, counts: { 4:1, 5:2, 6:1, 7:3, 11:4, 12:3, 13:2, 14:7, 18:1, 19:2, 20:1, 21:2, 24:3, 25:2 } };
 const OWNED = ['R01', 'R02', 'R03', 'R05', 'R10', 'R17'];
 const ME = 'R02';              // 兔子
@@ -92,6 +101,16 @@ const noteLi = (n, i) => `<li class="note note-${n.c}${n.stale ? ' stale' : ''}"
   + `<textarea class="note-text" rows="1">${esc(n.t)}</textarea>`
   + (n.age ? `<span class="note-age">${n.age}</span>` : '')
   + `<button class="note-x" aria-label="拿走"></button></li>`;
+
+/* 剪贴板条目：照抄 ui.js clipRender()。整条是复制的点击区，叉在右上角 */
+const CROSS_X = '<svg width="10" height="10" viewBox="0 0 5 5" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">'
+  + [[0,0],[1,1],[2,2],[3,3],[4,4],[4,0],[3,1],[1,3],[0,4]].map(([x,y]) => `<rect x="${x}" y="${y}" width="1" height="1"/>`).join('') + '</svg>';
+const clipLi = c => `<li class="clip-item">`
+  + `<div class="clip-text${c.fold ? ' fold' : ''}">${esc(c.t)}</div>`
+  + `<div class="clip-line"><span class="clip-line-left">`
+  + (c.fold ? `<button class="clip-more">全文</button>` : '')
+  + `</span><span class="clip-when">${c.w}</span></div>`
+  + `<button class="clip-x" aria-label="拿走">${CROSS_X}</button></li>`;
 
 /* desktop.js 启动时会把状态行和灰字从 .pet 里搬进板子底边。
    不照做的话 .pet 自带的那两个占位「—」会在四块屏上全露出来。 */
@@ -139,6 +158,13 @@ const archMonth = (() => {
   a = a.replace('id="arch-tab-day" class="arch-tab on"', 'id="arch-tab-day" class="arch-tab"');
   a = a.replace('id="arch-tab-month" class="arch-tab"', 'id="arch-tab-month" class="arch-tab on"');
   return a;
+})();
+
+/* 剪贴板 */
+const clip = (() => {
+  let c = fill(CLIP, 'clip-list', CLIPS.map(clipLi).join(''));
+  c = fill(c, 'clip-count', CLIPS.length + ' 条');
+  return hide(c, 'clip-empty');
 })();
 
 /* 图鉴 */
@@ -198,6 +224,7 @@ writeFileSync(path.join(ROOT, 'demo.html'), `<!doctype html>
   ${shot('便签', '四条，列表在屏内滚', frame('panel', desk + petHtml, 252))}
   ${shot('回看 · 按天', '按划掉的那天排', frame('big', archDay + petHtml, 284))}
   ${shot('回看 · 按月', '只报每天划掉几件', frame('big', archMonth + petHtml, 284))}
+  ${shot('剪贴板', '存着等会儿取回来的东西', frame('big', clip + petHtml, 284))}
   ${shot('图鉴', '20 只，没抽到的只留剪影', frame('big', dex + petHtml, 284))}
 </div>
 </body></html>`);
