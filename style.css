@@ -53,6 +53,10 @@
    否则隐藏的结果页仍然占位，进 app 后满屏空白。 */
 [hidden] { display: none !important; }
 
+/* 键盘焦点自己画。系统默认那圈是圆角高亮色，糊在一块像素屏上像贴了张贴纸；
+   但不能直接 outline:none——用键盘时得看得见自己停在哪。 */
+:focus-visible { outline: 1px solid var(--lcd-soft); outline-offset: 2px; }
+
 body {
   margin: 0;
   background: var(--page);
@@ -747,7 +751,10 @@ button { font: inherit; cursor: pointer; }
   text-decoration: underline; text-underline-offset: 4px; text-decoration-color: transparent;
   transition: color .12s ease, text-decoration-color .12s ease;
 }
-.desk-link:hover { color: var(--lcd-soft); text-decoration-color: var(--lcd-line); }
+/* 这两个入口的焦点不画框，直接借用悬停那套——一行字外面套个方框太重了 */
+.desk-link:hover,
+.desk-link:focus-visible { color: var(--lcd-soft); text-decoration-color: var(--lcd-line); }
+.desk-link:focus-visible { outline: none; }
 
 /* ---------- 剪贴板 ----------
    跟回看、图鉴同一块屏、同一套外框。区别只在这里的东西是给你取回的，

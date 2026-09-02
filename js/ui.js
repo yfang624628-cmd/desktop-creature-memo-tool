@@ -1228,6 +1228,28 @@
     $('#open-arch').addEventListener('click', function () { archSwitchTab('day'); $('#arch').hidden = false; });
     $('#arch-close').addEventListener('click', function () { $('#arch').hidden = true; });
     $('#arch').addEventListener('click', function (e) { if (e.target.id === 'arch') $('#arch').hidden = true; });
+    /* Esc 一次只退一层：正在打字先退出输入，再关盖在上面的那块屏，
+       都没有就把板子收起来。三块屏 z-index 相同，靠 DOM 顺序分先后——
+       后面的盖在上面，所以从后往前找。 */
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || $('#app').hidden) return;
+
+      var el = document.activeElement;
+      if (el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable)) {
+        el.blur();
+        return;
+      }
+
+      var ids = ['#arch', '#clip', '#dex'];
+      for (var i = 0; i < ids.length; i++) {
+        if (!$(ids[i]).hidden) { $(ids[i]).hidden = true; return; }
+      }
+
+      // 桌面版才有这个叉。网页版没有板子要收，到这儿就没事可做了
+      var x = $('.desk-close');
+      if (x) x.click();
+    });
+
     $('#arch-tab-day').addEventListener('click', function () { archSwitchTab('day'); });
     $('#arch-tab-month').addEventListener('click', function () { archSwitchTab('month'); });
     $('#arch-month-prev').addEventListener('click', function () { archMonthShift(-1); });
