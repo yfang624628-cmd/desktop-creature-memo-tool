@@ -11,7 +11,7 @@
 
 <p align="center">
   <img src="docs/pet2.jpg" width="300" alt="它站在桌面上"><br><br>
-  <img src="docs/panel3.jpg" width="900" alt="便签、回看按天、回看按月、图鉴四块界面">
+  <img src="docs/panel3.jpg" width="900" alt="便签、回看按天、回看按月、剪贴板、图鉴五块界面">
 </p>
 
 
